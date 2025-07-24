@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-gray-800 dark:bg-dark-main-bg dark:text-dark-text-main;
+    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    padding: 0;
+    margin: 0;
+  }
+
+  a {
+    @apply text-primary-600 dark:text-dark-link;
+    text-decoration: none;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Custom scrollbar for dark theme */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #161b22;
+  border-radius: 10px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 10px;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #58a6ff;
+}
+
+/* General component styling adjustments for dark mode */
+.dark .bg-gray-50 { @apply bg-dark-card-bg; }
+.dark .text-gray-800 { @apply text-dark-text-main; }
+.dark .border-gray-200 { @apply border-dark-border; }
+.dark .shadow-lg { @apply shadow-none; }
+
+/* Example for a specific component if needed */
+.dark .sidebar-link.active {
+  @apply bg-dark-card-bg text-dark-link;
+}
+.dark .sidebar-link.active i {
+    @apply text-dark-link;
+}
