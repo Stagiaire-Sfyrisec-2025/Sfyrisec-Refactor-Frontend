@@ -35,21 +35,21 @@ const Layout = ({ children }) => {
 
   const navLinkClasses = (path: string) =>
     `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-      router.pathname === path
+      router.pathname.startsWith(path)
         ? 'border-primary text-dark dark:text-dark-link'
         : 'border-transparent text-gray-500 dark:text-dark-text-secondary hover:border-gray-300 dark:hover:border-dark-border hover:text-gray-700 dark:hover:text-dark-text-main'
     }`;
 
   const mobileNavLinkClasses = (path: string) =>
     `block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-      router.pathname === path
+      router.pathname.startsWith(path)
         ? 'bg-primary-50 dark:bg-dark-card-bg border-primary dark:border-dark-link text-primary dark:text-dark-link'
         : 'border-transparent text-gray-500 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-card-bg hover:border-gray-300 dark:hover:border-dark-border hover:text-gray-700 dark:hover:text-dark-text-main'
     }`;
 
   const sidebarLinkClasses = (path: string) =>
     `sidebar-link group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-        router.pathname === path ? 'active bg-gray-100 dark:bg-dark-card-bg text-gray-900 dark:text-dark-link' : 'text-gray-700 dark:text-dark-text-secondary hover:bg-gray-100 dark:hover:bg-dark-card-bg hover:text-gray-900 dark:hover:text-dark-text-main'
+        router.pathname.startsWith(path) ? 'active bg-gray-100 dark:bg-dark-card-bg text-gray-900 dark:text-dark-link' : 'text-gray-700 dark:text-dark-text-secondary hover:bg-gray-100 dark:hover:bg-dark-card-bg hover:text-gray-900 dark:hover:text-dark-text-main'
     }`;
 
   return (
@@ -72,7 +72,7 @@ const Layout = ({ children }) => {
                       <span className="text-xl font-bold text-dark dark:text-dark-text-main">CodeRefactor</span>
                     </div>
                     <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                      <Link href="/" legacyBehavior><a className={navLinkClasses('/')}>Tableau de bord</a></Link>
+                      <Link href="/dashboard" legacyBehavior><a className={navLinkClasses('/dashboard')}>Tableau de bord</a></Link>
                       <Link href="/refactor" legacyBehavior><a className={navLinkClasses('/refactor')}>Refactoriser</a></Link>
                       <Link href="/history" legacyBehavior><a className={navLinkClasses('/history')}>Historique</a></Link>
                     </div>
@@ -131,7 +131,7 @@ const Layout = ({ children }) => {
               </div>
               <div className={`${mobileMenuOpen ? 'block' : 'hidden'} sm:hidden bg-white dark:bg-dark-card-bg`} id="mobile-menu">
                 <div className="pt-2 pb-3 space-y-1">
-                  <Link href="/" legacyBehavior><a onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClasses('/')}>Tableau de bord</a></Link>
+                  <Link href="/dashboard" legacyBehavior><a onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClasses('/dashboard')}>Tableau de bord</a></Link>
                   <Link href="/refactor" legacyBehavior><a onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClasses('/refactor')}>Refactoriser</a></Link>
                   <Link href="/history" legacyBehavior><a onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClasses('/history')}>Historique</a></Link>
                 </div>
@@ -173,7 +173,7 @@ const Layout = ({ children }) => {
                   </div>
                   <div className="mt-5 flex-grow flex flex-col">
                     <nav className="flex-1 px-2 pb-4 space-y-1">
-                      <Link href="/" legacyBehavior><a className={sidebarLinkClasses('/')}><FontAwesomeIcon icon={faTachometerAlt} className="text-gray-500 dark:text-dark-text-secondary group-hover:text-primary mr-3 flex-shrink-0 h-5 w-5" />Tableau de bord</a></Link>
+                      <Link href="/dashboard" legacyBehavior><a className={sidebarLinkClasses('/dashboard')}><FontAwesomeIcon icon={faTachometerAlt} className="text-gray-500 dark:text-dark-text-secondary group-hover:text-primary mr-3 flex-shrink-0 h-5 w-5" />Tableau de bord</a></Link>
                       <Link href="/refactor" legacyBehavior><a className={sidebarLinkClasses('/refactor')}><FontAwesomeIcon icon={faCode} className="text-gray-500 dark:text-dark-text-secondary group-hover:text-primary mr-3 flex-shrink-0 h-5 w-5" />Refactoriser</a></Link>
                       <Link href="/history" legacyBehavior><a className={sidebarLinkClasses('/history')}><FontAwesomeIcon icon={faHistory} className="text-gray-500 dark:text-dark-text-secondary group-hover:text-primary mr-3 flex-shrink-0 h-5 w-5" />Historique</a></Link>
                       <Link href="/profile" legacyBehavior><a className={sidebarLinkClasses('/profile')}><FontAwesomeIcon icon={faUserCircle} className="text-gray-500 dark:text-dark-text-secondary group-hover:text-primary mr-3 flex-shrink-0 h-5 w-5" />Profil</a></Link>
