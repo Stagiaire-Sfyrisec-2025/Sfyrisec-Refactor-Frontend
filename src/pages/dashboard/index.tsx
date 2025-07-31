@@ -11,10 +11,10 @@ import { useColorScheme } from '@mui/joy/styles';
 
 const DashboardPage = () => {
   const { mode } = useColorScheme();
-  const refactorChartRef = useRef(null);
-  const languageChartRef = useRef(null);
-  const refactorChartInstance = useRef(null);
-  const languageChartInstance = useRef(null);
+  const refactorChartRef = useRef<HTMLCanvasElement | null>(null);
+  const languageChartRef = useRef<HTMLCanvasElement | null>(null);
+  const refactorChartInstance = useRef<Chart | null>(null);
+  const languageChartInstance = useRef<Chart | null>(null);
 
   useEffect(() => {
     const isDark = mode === 'dark';
@@ -64,7 +64,6 @@ const DashboardPage = () => {
                 bodyColor: isDark ? '#c9d1d9' : '#545454',
                 borderColor: isDark ? '#30363d' : '#ccc',
                 borderWidth: 1,
-                 hoverOffset: 30,
               },
             },
             scales: {
