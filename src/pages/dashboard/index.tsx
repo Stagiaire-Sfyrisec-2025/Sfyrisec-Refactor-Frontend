@@ -3,13 +3,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileCode, faArrowUp, faBug, faChartLine, faClock } from '@fortawesome/free-solid-svg-icons';
 import { faJs, faPython, faJava, faPhp } from '@fortawesome/free-brands-svg-icons';
 import Chart from 'chart.js/auto';
-import ProjectCard from './ProjectCard';
+import ProjectCard from '../../components/ProjectCard';
 import Sheet from '@mui/joy/Sheet';
 import Typography from '@mui/joy/Typography';
 import Box from '@mui/joy/Box';
 import { useColorScheme } from '@mui/joy/styles';
 
-const Dashboard = () => {
+const DashboardPage = () => {
   const { mode } = useColorScheme();
   const refactorChartRef = useRef<HTMLCanvasElement | null>(null);
   const languageChartRef = useRef<HTMLCanvasElement | null>(null);
@@ -253,4 +253,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default DashboardPage;

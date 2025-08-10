@@ -1,54 +1,35 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagic, faFileAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
 import FileUploader from './FileUploader';
 import { RefactorOptions, UploadedFile } from '../types/project';
 
 interface RefactorFormProps {
-  onRefactorComplete: () => void;
+  selectedFiles: UploadedFile[];
+  options: RefactorOptions;      // Rendu optionnel avec fallback par défaut
+  onFilesSelected: (files: File[]) => void;
+  onRemoveFile: (fileId: string) => void;
+  onOptionChange: (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => void;
+  onSubmit: () => void;
 }
 
-const RefactorForm: React.FC<RefactorFormProps> = ({ onRefactorComplete }) => {
-  const [selectedFiles, setSelectedFiles] = useState<UploadedFile[]>([]);
-  const [options, setOptions] = useState<RefactorOptions>({
-    level: 'Standard',
+const RefactorForm: React.FC<RefactorFormProps> = ({
+  selectedFiles = [], // fallback si non fourni
+  options = {
+    level: 'Standard (recommandé)',
     mainLanguage: 'Détection automatique',
-    addComments: true,
-    optimizeVariableNames: true,
-    detectDeadCode: true,
+    addComments: false,
+    optimizeVariableNames: false,
+    detectDeadCode: false,
     restructureModules: false,
-  });
-
-  const handleFilesSelected = (files: File[]) => {
-    const newUploadedFiles: UploadedFile[] = files.map(file => ({
-      id: crypto.randomUUID(),
-      name: file.name,
-      size: file.size,
-      type: file.type,
-    }));
-    setSelectedFiles(prevFiles => [...prevFiles, ...newUploadedFiles]);
-  };
-
-  const handleRemoveFile = (fileIdToRemove: string) => {
-    setSelectedFiles(prevFiles => prevFiles.filter(file => file.id !== fileIdToRemove));
-  };
-
-  const handleOptionChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
-    const { name, value, type } = e.target;
-    if (type === 'checkbox') {
-      const { checked } = e.target as HTMLInputElement;
-      setOptions(prevOptions => ({ ...prevOptions, [name]: checked }));
-    } else {
-      setOptions(prevOptions => ({ ...prevOptions, [name]: value }));
-    }
-  };
-
+  },
+  onFilesSelected,
+  onRemoveFile,
+  onOptionChange,
+  onSubmit,
+}) => {
   const handleSubmitRefactor = () => {
-    if (selectedFiles.length > 0) {
-      onRefactorComplete();
-    } else {
-      alert("Veuillez sélectionner des fichiers à refactoriser.");
-    }
+    onSubmit();
   };
 
   return (
@@ -63,9 +44,9 @@ const RefactorForm: React.FC<RefactorFormProps> = ({ onRefactorComplete }) => {
 
         <div className="bg-gray-50 dark:bg-[#161b22] border border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 shadow-sm">
           <FileUploader
-            onFilesSelected={handleFilesSelected}
+            onFilesSelected={onFilesSelected}
             selectedFiles={selectedFiles}
-            onRemoveFile={handleRemoveFile}
+            onRemoveFile={onRemoveFile}
           />
 
           {selectedFiles.length > 0 && (
@@ -82,7 +63,7 @@ const RefactorForm: React.FC<RefactorFormProps> = ({ onRefactorComplete }) => {
                     </span>
                   </div>
                   <button
-                    onClick={() => handleRemoveFile(file.id)}
+                    onClick={() => onRemoveFile(file.id)}
                     className="text-red-500 hover:text-red-700"
                     title="Supprimer"
                   >
@@ -107,7 +88,7 @@ const RefactorForm: React.FC<RefactorFormProps> = ({ onRefactorComplete }) => {
               <select
                 name="level"
                 value={options.level}
-                onChange={handleOptionChange}
+                onChange={onOptionChange}
                 className="w-full bg-gray-50 dark:bg-[#0d1117] text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3"
               >
                 <option>Basique (nettoyage simple)</option>
@@ -123,7 +104,7 @@ const RefactorForm: React.FC<RefactorFormProps> = ({ onRefactorComplete }) => {
               <select
                 name="mainLanguage"
                 value={options.mainLanguage}
-                onChange={handleOptionChange}
+                onChange={onOptionChange}
                 className="w-full bg-gray-50 dark:bg-[#0d1117] text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3"
               >
                 <option>Détection automatique</option>
@@ -150,8 +131,8 @@ const RefactorForm: React.FC<RefactorFormProps> = ({ onRefactorComplete }) => {
                 <input
                   type="checkbox"
                   name={opt.id}
-                  checked={options[opt.id]}
-                  onChange={handleOptionChange}
+                  checked={options[opt.id as keyof RefactorOptions]}
+                  onChange={onOptionChange}
                   className="mt-1 h-5 w-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
                 />
                 <div>
