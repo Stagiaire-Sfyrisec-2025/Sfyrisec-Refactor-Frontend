@@ -1,32 +1,16 @@
-# CodeRefactor – Plateforme de Refactorisation de Code
+# CodeRefactor Project (Root)
 
-## 🔷 Frontend
+This is the root directory for the CodeRefactor project.
 
-👉 Voir [`frontend/README.md`](frontend/README.md) pour les instructions détaillées sur :
+## Frontend
 
-- l'installation des dépendances
-- le démarrage du serveur de développement
-- la structure du projet
+The Next.js frontend application is located in the `frontend/` directory.
+Please refer to `frontend/README.md` for specific instructions on how to run and develop the frontend.
 
-## 🔐 Authentification (Simulation Temporaire)
+## Backend (Placeholder)
 
-Pour tester l'application, vous pouvez utiliser les identifiants suivants :
+(Instructions for the backend will be added here once it's developed.)
 
-- **Email** : `user@example.com`
-- **Mot de passe** : `password123`
+## Overall Project Setup
 
-⚠️ Il s'agit d'une simulation locale d'authentification – aucune connexion réelle à une base de données pour le moment.
-
-
-## ⚙️ Configuration Générale
-
-- Le projet utilise **Next.js** pour le rendu côté serveur et le développement frontend.
-- Le contexte d'authentification est géré via `React Context` avec persistance dans `localStorage`.
-- L’interface est compatible avec les thèmes **clair/sombre**.
-
-## 🚀 Lancer le projet (version simplifiée)
-
-```bash
-cd frontend
-npm install
-npm run dev
+(Any global setup instructions or notes about how different parts of the project interact will go here.)

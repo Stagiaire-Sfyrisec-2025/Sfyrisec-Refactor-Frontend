@@ -11,19 +11,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faJs } from '@fortawesome/free-brands-svg-icons';
 import CodeComparer from './CodeComparer';
-import { RefactorResultSummary, RefactorFileDetail } from '../types/project';
-
-const sampleSummary: RefactorResultSummary = {
-  cyclomaticComplexityChange: '-32%',
-  deadCodeRemovedLines: '142 lignes',
-  commentsAdded: '28 commentaires',
-};
-
-const sampleFileDetails: RefactorFileDetail[] = [
-  { fileName: 'api.js', language: 'JavaScript', type: 'Refactorisé', changesSummary: '12 améliorations', details: '3 variables renommées', status: 'Succès', iconClass: 'fab fa-js text-yellow-400' },
-  { fileName: 'utils.js', language: 'JavaScript', type: 'Optimisé', changesSummary: '8 améliorations', details: '2 fonctions simplifiées', status: 'Succès', iconClass: 'fab fa-js text-yellow-400' },
-  { fileName: 'config.js', language: 'JavaScript', type: 'Partiel', changesSummary: '3 améliorations', details: '1 problème non résolu', status: 'Avertissement', iconClass: 'fab fa-js text-yellow-400' },
-];
+import { RefactorFileDetail } from '../types/project';
 
 const getStatusDotClass = (status: 'Succès' | 'Avertissement' | 'Échec') => {
   switch (status) {
@@ -46,11 +34,30 @@ const getTypeBadgeClass = (type: RefactorFileDetail['type']) => {
 interface ResultsDisplayProps {
   status: 'loading' | 'complete';
   onReset: () => void;
+  analysisResult: any;
 }
 
-const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ status, onReset }) => {
-  const summary = sampleSummary;
-  const fileDetails = sampleFileDetails;
+const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ status, onReset, analysisResult }) => {
+  if (status === 'complete' && !analysisResult) {
+    return (
+      <div className="p-6 text-center">
+        <h2 className="text-2xl font-bold text-red-500">Erreur</h2>
+        <p className="text-gray-600 dark:text-gray-400">Les résultats de l&apos;analyse ne sont pas disponibles.</p>
+        <button
+          onClick={onReset}
+          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-dark-btn-primary hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+        >
+          <FontAwesomeIcon icon={faArrowLeft} className="mr-2 h-4 w-4" />
+          Retour
+        </button>
+      </div>
+    );
+  }
+
+  const summary = analysisResult?.summary;
+  const fileDetails = analysisResult?.fileDetails;
+  const originalCode = analysisResult?.originalCode;
+  const refactoredCode = analysisResult?.refactoredCode;
 
   return (
     <div id="results-section" className="p-6 dark:bg-dark-main-bg">
@@ -72,7 +79,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ status, onReset }) => {
             </div>
           )}
 
-          {status === 'complete' && (
+          {status === 'complete' && summary && fileDetails && (
             <>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-dark dark:text-dark-text-main">Résultats de la refactorisation</h2>
@@ -171,7 +178,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ status, onReset }) => {
                           </tr>
                         </thead>
                         <tbody className="bg-white dark:bg-dark-card-bg divide-y divide-gray-200 dark:divide-dark-border">
-                          {fileDetails.map((file, index) => (
+                          {fileDetails.map((file: RefactorFileDetail, index: number) => (
                             <tr key={index}>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="flex items-center">
@@ -206,10 +213,12 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ status, onReset }) => {
                 </div>
               </div>
 
-              <CodeComparer
-                originalCode={`function processData(data) { ... }`}
-                refactoredCode={`function processActiveItemsWithMarkup(items) { ... }`}
-              />
+              {originalCode && refactoredCode && (
+                <CodeComparer
+                  originalCode={originalCode}
+                  refactoredCode={refactoredCode}
+                />
+              )}
             </>
           )}
         </div>

@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera, faSave, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
-import LanguageChart from '../components/LanguageChart';
-import ProjectsChart from '../components/ProjectsChart';
+import LanguageChart from '@/components/LanguageChart';
+import ProjectsChart from '@/components/ProjectsChart';
 
 const ProfilePage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [profile, setProfile] = useState({
     fullName: 'Rojo',
-    username: 'Rojodoe',
-    email: 'Rojo.doe@example.com',
+    username: 'Rojotiana',
+    email: 'Rojo.tiana@example.com',
     phone: '+1 (555) 123-4567',
     bio: "Développeur full-stack avec 5 ans d'expérience. Passionné par les bonnes pratiques de code et l'optimisation des performances.",
     avatar: 'https://via.placeholder.com/150',
@@ -81,11 +81,11 @@ const ProfilePage = () => {
               <h4 className="font-medium text-gray-800 dark:text-dark-text-main mb-2">Liens</h4>
               <div className="flex items-center text-sm text-blue-600 dark:text-dark-link hover:text-blue-800 dark:hover:text-white mb-2">
                 <FontAwesomeIcon icon={faGithub} className="mr-2" />
-                <a href="#" target="_blank">github.com/Rojodoe</a>
+                <a href="#" target="_blank">github.com/Rojotiana</a>
               </div>
               <div className="flex items-center text-sm text-blue-600 dark:text-dark-link hover:text-blue-800 dark:hover:text-white">
                 <i className="fas fa-globe mr-2"></i>
-                <a href="#" target="_blank">portfolio.Rojodoe.dev</a>
+                <a href="#" target="_blank">portfolio.Rojotiana.dev</a>
               </div>
             </div>
           </div>
