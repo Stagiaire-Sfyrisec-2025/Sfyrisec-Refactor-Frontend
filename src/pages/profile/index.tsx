@@ -110,7 +110,7 @@ const ProfilePage = () => {
                     <input type="text" name="fullName" value={profile.fullName} onChange={handleInputChange} className="w-full border rounded-lg px-3 py-2 bg-white dark:bg-dark-main-bg text-gray-900 dark:text-dark-text-main border-gray-300 dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Nom d'utilisateur</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Nom d&apos;utilisateur</label>
                     <input type="text" name="username" value={profile.username} onChange={handleInputChange} className="w-full border rounded-lg px-3 py-2 bg-white dark:bg-dark-main-bg text-gray-900 dark:text-dark-text-main border-gray-300 dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
@@ -134,7 +134,7 @@ const ProfilePage = () => {
                   <p className="text-gray-800 dark:text-dark-text-main">{profile.fullName}</p>
                 </div>
                 <div className="bg-gray-100 dark:bg-dark-main-bg p-4 rounded-lg">
-                  <p className="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Nom d'utilisateur</p>
+                  <p className="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Nom d&apos;utilisateur</p>
                   <p className="text-gray-800 dark:text-dark-text-main">{profile.username}</p>
                 </div>
                 <div className="bg-gray-100 dark:bg-dark-main-bg p-4 rounded-lg">

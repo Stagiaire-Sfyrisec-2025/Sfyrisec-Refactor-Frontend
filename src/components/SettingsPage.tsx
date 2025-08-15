@@ -42,7 +42,7 @@ const SettingsPage = () => {
               </div>
               <div className="flex items-center">
                 <input type="checkbox" id="app-notifications" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" defaultChecked />
-                <label htmlFor="app-notifications" className="ml-2 block text-sm text-gray-700 dark:text-dark-text-secondary">Notifications dans l'application</label>
+                <label htmlFor="app-notifications" className="ml-2 block text-sm text-gray-700 dark:text-dark-text-secondary">Notifications dans l&apos;application</label>
               </div>
             </div>
           </div>
@@ -50,7 +50,7 @@ const SettingsPage = () => {
             <h4 className="font-medium mb-4 text-gray-800 dark:text-dark-text-main">Paramètres avancés</h4>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Taille de l'éditeur de code</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Taille de l&apos;éditeur de code</label>
                 <select className="w-full md:w-1/3 border rounded-lg px-3 py-2 bg-white dark:bg-dark-main-bg dark:text-dark-text-main dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option>Petite</option>
                   <option>Moyenne</option>
@@ -58,7 +58,7 @@ const SettingsPage = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Police de l'éditeur</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Police de l&apos;éditeur</label>
                 <select className="w-full md:w-1/3 border rounded-lg px-3 py-2 bg-white dark:bg-dark-main-bg dark:text-dark-text-main dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option>Courier New</option>
                   <option>Fira Code</option>
