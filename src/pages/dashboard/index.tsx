@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useContext, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileCode, faArrowUp, faBug, faChartLine, faClock } from '@fortawesome/free-solid-svg-icons';
 import { faJs, faPython, faJava, faPhp } from '@fortawesome/free-brands-svg-icons';
@@ -8,9 +8,17 @@ import Sheet from '@mui/joy/Sheet';
 import Typography from '@mui/joy/Typography';
 import Box from '@mui/joy/Box';
 import { useColorScheme } from '@mui/joy/styles';
+import { RefactoringHistoryContext } from '@/context/RefactoringHistoryContext';
 
 const DashboardPage = () => {
   const { mode } = useColorScheme();
+  const { history } = useContext(RefactoringHistoryContext);
+  const [dashboardStats, setDashboardStats] = useState({
+    projectsRefactored: 0,
+    problemsSolved: 0,
+    complexityReduced: 0,
+    timeSaved: 0, // Placeholder
+  });
   const refactorChartRef = useRef<HTMLCanvasElement | null>(null);
   const languageChartRef = useRef<HTMLCanvasElement | null>(null);
   const refactorChartInstance = useRef<Chart | null>(null);
@@ -25,15 +33,31 @@ const DashboardPage = () => {
     if (languageChartInstance.current) languageChartInstance.current.destroy();
 
     if (refactorChartRef.current) {
+      const last7Days = Array.from({ length: 7 }).map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        return d.toLocaleDateString();
+      }).reverse();
+
+      const projectsByDate = history.reduce((acc, entry) => {
+        const date = entry.timestamp.toLocaleDateString();
+        if (last7Days.includes(date)) {
+          acc[date] = (acc[date] || 0) + 1;
+        }
+        return acc;
+      }, {} as { [key: string]: number });
+
+      const chartData = last7Days.map(date => projectsByDate[date] || 0);
+
       const refactorCtx = refactorChartRef.current.getContext('2d');
       if (refactorCtx) {
         refactorChartInstance.current = new Chart(refactorCtx, {
           type: 'line',
           data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+            labels: last7Days,
             datasets: [{
-              label: 'Projets refactorisés',
-              data: [12, 19, 15, 22, 18, 24, 27],
+              label: 'Projets refactorisés (7 derniers jours)',
+              data: chartData,
               borderColor: isDark ? '#58a6ff' : '#3b82f6',
               backgroundColor: isDark ? 'rgba(88, 166, 255, 0.2)' : 'rgba(59, 130, 246, 0.2)',
               tension: 0.4,
@@ -95,14 +119,20 @@ const DashboardPage = () => {
     }
 
     if (languageChartRef.current) {
+      const projectsByLanguage = history.reduce((acc, entry) => {
+        const lang = entry.options.mainLanguage || 'Unknown';
+        acc[lang] = (acc[lang] || 0) + 1;
+        return acc;
+      }, {} as { [key: string]: number });
+
       const languageCtx = languageChartRef.current.getContext('2d');
       if (languageCtx) {
         languageChartInstance.current = new Chart(languageCtx, {
           type: 'doughnut',
           data: {
-            labels: ['JavaScript', 'Python', 'Java', 'PHP', 'C#'],
+            labels: Object.keys(projectsByLanguage),
             datasets: [{
-              data: [35, 25, 20, 15, 5],
+              data: Object.values(projectsByLanguage),
               backgroundColor: [
                 '#3f89c56e',
                 '#483fc56e',
@@ -120,7 +150,6 @@ const DashboardPage = () => {
               borderWidth: 1,
               hoverOffset: 30,
             }]
-
           },
           options: {
             responsive: true,
@@ -157,14 +186,49 @@ const DashboardPage = () => {
       if (refactorChartInstance.current) refactorChartInstance.current.destroy();
       if (languageChartInstance.current) languageChartInstance.current.destroy();
     };
-  }, [mode]);
+  }, [mode, history]);
 
-  const recentProjectsData = [
-    { id: 1, name: 'Projet API JavaScript', langIcon: faJs, langColor: 'text-yellow-400', time: 'il y a 2 heures', status: 'Terminé', statusColor: 'bg-green-100 dark:bg-gray-700 text-green-800 dark:text-green-400', iconBg: 'bg-yellow-100 dark:bg-gray-800' },
-    { id: 2, name: 'Script Python', langIcon: faPython, langColor: 'text-blue-400', time: 'il y a 1 jour', status: 'Terminé', statusColor: 'bg-green-100 dark:bg-gray-700 text-green-800 dark:text-green-400', iconBg: 'bg-blue-100 dark:bg-gray-800' },
-    { id: 3, name: 'Application Java', langIcon: faJava, langColor: 'text-red-400', time: 'il y a 3 jours', status: 'Terminé', statusColor: 'bg-green-100 dark:bg-gray-700 text-green-800 dark:text-green-400', iconBg: 'bg-red-100 dark:bg-gray-800' },
-    { id: 4, name: 'Site Web PHP', langIcon: faPhp, langColor: 'text-purple-400', time: 'il y a 1 semaine', status: 'Terminé', statusColor: 'bg-green-100 dark:bg-gray-700 text-green-800 dark:text-green-400', iconBg: 'bg-purple-100 dark:bg-gray-800' },
-    { id: 5, name: 'Projet C#', langIcon: faFileCode, langColor: 'text-green-400', time: 'il y a 2 semaines', status: 'Terminé', statusColor: 'bg-green-100 dark:bg-gray-700 text-green-800 dark:text-green-400', iconBg: 'bg-green-100 dark:bg-gray-800' },
+  useEffect(() => {
+    if (history.length > 0) {
+      const projectsRefactored = history.length;
+      let problemsSolved = 0;
+      let complexityReduced = 0;
+
+      history.forEach(entry => {
+        const initial = entry.initialAnalysis.summary;
+        const refactored = entry.refactoredAnalysis.summary;
+
+        problemsSolved += (initial.deadCode - refactored.deadCode);
+        problemsSolved += (initial.redundancy - refactored.redundancy);
+        problemsSolved += (initial.conventionIssues - refactored.conventionIssues);
+        complexityReduced += (initial.cyclomaticComplexity - refactored.cyclomaticComplexity);
+      });
+
+      setDashboardStats({
+        projectsRefactored,
+        problemsSolved,
+        complexityReduced,
+        timeSaved: Math.round(complexityReduced * 0.5) // Placeholder logic
+      });
+    }
+  }, [history]);
+
+  const recentProjectsData = history.slice(-5).map(entry => ({
+    id: entry.id,
+    name: entry.projectName,
+    langIcon: faPython, // Assuming python for now
+    langColor: 'text-blue-400',
+    time: entry.timestamp.toLocaleDateString(),
+    status: 'Terminé',
+    statusColor: 'bg-green-100 dark:bg-gray-700 text-green-800 dark:text-green-400',
+    iconBg: 'bg-blue-100 dark:bg-gray-800',
+  })).reverse();
+
+  const statsCards = [
+    { title: 'Projets refactorisés', value: dashboardStats.projectsRefactored, change: '', icon: faFileCode, color: '#3b82f6', bgColor: 'rgba(59, 130, 246, 0.2)' },
+    { title: 'Problèmes résolus', value: dashboardStats.problemsSolved, change: '', icon: faBug, color: '#8b5cf6', bgColor: 'rgba(139, 92, 246, 0.2)' },
+    { title: 'Complexité réduite', value: dashboardStats.complexityReduced, change: '', icon: faChartLine, color: '#10b981', bgColor: 'rgba(16, 185, 129, 0.2)' },
+    { title: 'Temps économisé', value: `${dashboardStats.timeSaved}h`, change: '', icon: faClock, color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.2)' },
   ];
 
   return (
@@ -176,12 +240,7 @@ const DashboardPage = () => {
           </Typography>
 
           <Box className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-            {[
-              { title: 'Projets refactorisés', value: '24', change: '+12%', icon: faFileCode, color: '#3b82f6', bgColor: 'rgba(59, 130, 246, 0.2)' },
-              { title: 'Problèmes résolus', value: '142', change: '+8%', icon: faBug, color: '#8b5cf6', bgColor: 'rgba(139, 92, 246, 0.2)' },
-              { title: 'Complexité réduite', value: '32%', change: '+5%', icon: faChartLine, color: '#10b981', bgColor: 'rgba(16, 185, 129, 0.2)' },
-              { title: 'Temps économisé', value: '42h', change: '+18%', icon: faClock, color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.2)' },
-            ].map((stat, index) => (
+            {statsCards.map((stat, index) => (
               <Sheet key={index} variant="outlined" sx={{ borderRadius: 'lg', overflow: 'hidden', bgcolor: 'background.surface', backgroundColor: mode === 'dark' ? '#161b22' : '' }}>
                 <Box sx={{ p: 2.5 }}>
                   <div className="flex items-center">
@@ -197,11 +256,13 @@ const DashboardPage = () => {
                           <Typography component="div" className="text-2xl font-semibold" sx={{ color: mode === 'dark' ? '#e1e4e8' : '#1b1f23' }}>
                             {stat.value}
                           </Typography>
-                          <div className="ml-2 flex items-baseline text-sm font-semibold" style={{ color: mode === 'dark' ? '#3fb950' : stat.color }}>
-                            <FontAwesomeIcon icon={faArrowUp} className="text-xs self-center" />
-                            <span className="sr-only">Increased by</span>
-                            {stat.change}
-                          </div>
+                          {stat.change && (
+                            <div className="ml-2 flex items-baseline text-sm font-semibold" style={{ color: mode === 'dark' ? '#3fb950' : stat.color }}>
+                              <FontAwesomeIcon icon={faArrowUp} className="text-xs self-center" />
+                              <span className="sr-only">Increased by</span>
+                              {stat.change}
+                            </div>
+                          )}
                         </dd>
                       </dl>
                     </div>

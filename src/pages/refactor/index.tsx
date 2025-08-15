@@ -1,16 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import RefactorForm from '@/components/RefactorForm';
 import ResultsDisplay from '@/components/ResultsDisplay';
 import { UploadedFile, RefactorOptions } from '@/types/project';
 import { uploadAndAnalyseFiles } from '@/services/api';
 import { transformAnalysisReport } from '@/utils/transformAnalysis';
+import { RefactoringHistoryContext } from '@/context/RefactoringHistoryContext';
 
 type RefactorStatus = 'idle' | 'analyzing' | 'analyzed' | 'refactoring' | 'refactored' | 'error';
 
 const RefactorPage = () => {
   const [status, setStatus] = useState<RefactorStatus>('idle');
   const [selectedFiles, setSelectedFiles] = useState<UploadedFile[]>([]);
+  const [projectName, setProjectName] = useState<string>('');
   const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [initialAnalysis, setInitialAnalysis] = useState<any>(null); // To store the 'before' state
+  const { addHistoryEntry } = useContext(RefactoringHistoryContext);
   const [options, setOptions] = useState<RefactorOptions>({
     level: 'Standard (recommandé)',
     mainLanguage: 'Détection automatique',
@@ -48,6 +52,7 @@ const RefactorPage = () => {
       const result = await uploadAndAnalyseFiles(selectedFiles, options);
       const transformedResult = transformAnalysisReport(result);
       setAnalysisResult(transformedResult);
+      setInitialAnalysis(transformedResult); // Save the initial state
       setStatus('analyzed');
     } catch (error) {
       console.error('Failed to analyse code:', error);
@@ -59,10 +64,8 @@ const RefactorPage = () => {
   const handleRefactorStart = async () => {
     setStatus('refactoring');
 
-    // Simulate refactoring process by creating a new, improved analysis result
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Create a new simulated result with improved metrics
     const refactoredResult = { ...analysisResult };
     refactoredResult.summary = {
       ...refactoredResult.summary,
@@ -71,7 +74,13 @@ const RefactorPage = () => {
       redundancy: Math.floor(analysisResult.summary.redundancy * 0.3),
       conventionIssues: Math.floor(analysisResult.summary.conventionIssues * 0.5),
     };
-    // Here you could also update fileDetails to show 'Refactorisé' status, etc.
+
+    addHistoryEntry({
+      initialAnalysis,
+      refactoredAnalysis: refactoredResult,
+      options,
+      projectName: projectName || 'Projet sans nom',
+    });
 
     setAnalysisResult(refactoredResult);
     setStatus('refactored');
@@ -80,7 +89,9 @@ const RefactorPage = () => {
   const handleReset = () => {
     setStatus('idle');
     setSelectedFiles([]);
+    setProjectName('');
     setAnalysisResult(null);
+    setInitialAnalysis(null);
   };
 
   if (['analyzing', 'analyzed', 'refactoring', 'refactored', 'error'].includes(status)) {
@@ -102,6 +113,8 @@ const RefactorPage = () => {
       onFilesSelected={handleFilesSelected}
       onRemoveFile={handleRemoveFile}
       onSubmit={handleAnalysisStart}
+      projectName={projectName}
+      onProjectNameChange={(e) => setProjectName(e.target.value)}
     />
   );
 };

@@ -6,6 +6,8 @@ import { RefactorOptions, UploadedFile } from '../types/project';
 
 interface RefactorFormProps {
   selectedFiles: UploadedFile[];
+  projectName: string;
+  onProjectNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onFilesSelected: (files: File[]) => void;
   onRemoveFile: (fileId: string) => void;
   onSubmit: () => void;
@@ -13,6 +15,8 @@ interface RefactorFormProps {
 
 const RefactorForm: React.FC<RefactorFormProps> = ({
   selectedFiles = [], // fallback si non fourni
+  projectName,
+  onProjectNameChange,
   onFilesSelected,
   onRemoveFile,
   onSubmit,
@@ -30,6 +34,20 @@ const RefactorForm: React.FC<RefactorFormProps> = ({
             Optimisez et restructurez vos fichiers automatiquement
           </p>
         </header>
+
+        <div className="mb-6">
+          <label htmlFor="project-name" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">
+            Nom du Projet
+          </label>
+          <input
+            type="text"
+            id="project-name"
+            value={projectName}
+            onChange={onProjectNameChange}
+            className="w-full bg-white dark:bg-dark-main-bg border border-gray-300 dark:border-dark-border rounded-md py-2 px-3 text-gray-900 dark:text-dark-text-main focus:outline-none focus:ring-2 focus:ring-primary-500"
+            placeholder="Ex: Mon Projet de Refactorisation"
+          />
+        </div>
 
         <div className="bg-gray-50 dark:bg-[#161b22] border border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 shadow-sm">
           <FileUploader
