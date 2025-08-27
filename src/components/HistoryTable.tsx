@@ -1,19 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faJs, faPython, faJava, faPhp } from '@fortawesome/free-brands-svg-icons';
-import { faDownload, faEye } from '@fortawesome/free-solid-svg-icons';
+import { faDownload, faEye, faSpinner, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 import { Project } from '../types/project';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid';
 import HistoryChart from './HistoryChart';
+import { getHistory } from '../services/api'; 
 
-const sampleHistoryData: Project[] = [
-  { id: '1', name: 'E-commerce API', language: 'JavaScript', lastRefactored: '15 juin 2023 - 14:32', status: 'Terminé', improvement: '+42%', fileCount: 12, icon: faJs },
-  { id: '2', name: 'Data Analysis', language: 'Python', lastRefactored: '10 juin 2023 - 09:15', status: 'Terminé', improvement: '+38%', fileCount: 8, icon: faPython },
-  { id: '3', name: 'Inventory App', language: 'Java', lastRefactored: '2 juin 2023 - 16:48', status: 'Terminé', improvement: '+29%', fileCount: 23, icon: faJava },
-  { id: '4', name: 'CMS Backend', language: 'PHP', lastRefactored: '28 mai 2023 - 11:20', status: 'Partiel', improvement: '+18%', fileCount: 17, icon: faPhp },
-  { id: '5', name: 'Utility Scripts', language: 'Python', lastRefactored: '25 mai 2023 - 10:00', status: 'Terminé', improvement: '+55%', fileCount: 5, icon: faPython },
-  { id: '6', name: 'Frontend UI Kit', language: 'JavaScript', lastRefactored: '20 mai 2023 - 18:30', status: 'Terminé', improvement: '+33%', fileCount: 30, icon: faJs },
-];
+const getLanguageIcon = (language: string) => {
+  switch (language.toLowerCase()) {
+    case 'javascript':
+      return faJs;
+    case 'python':
+      return faPython;
+    case 'java':
+      return faJava;
+    case 'php':
+      return faPhp;
+    default:
+      return faJs; 
+  }
+};
 
 const getStatusBadgeClass = (status: Project['status']) => {
   switch (status) {
@@ -47,7 +54,35 @@ const ITEMS_PER_PAGE = 4;
 
 const HistoryTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const historyData = sampleHistoryData;
+  const [historyData, setHistoryData] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        setLoading(true);
+        const data = await getHistory();
+        // Ensure icon is attached to each project
+        const dataWithIcons = data.map((project: Project) => ({
+          ...project,
+          icon: getLanguageIcon(project.language),
+        }));
+        setHistoryData(dataWithIcons);
+        setError(null);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, []);
 
   const totalPages = Math.ceil(historyData.length / ITEMS_PER_PAGE);
   const paginatedData = historyData.slice(
@@ -81,66 +116,78 @@ const HistoryTable = () => {
               <p className="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">Liste complète de vos refactorisations passées</p>
             </div>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
-                <thead className="bg-gray-100 dark:bg-dark-card-bg">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Nom du projet</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Langage</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Statut</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Amélioration</th>
-                    <th className="px-6 py-3"></th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-dark-card-bg divide-y divide-gray-200 dark:divide-dark-border">
-                  {paginatedData.map((project) => (
-                    <tr key={project.id} className="hover:bg-gray-50 dark:hover:bg-dark-main-bg transition-colors duration-200 cursor-pointer">
-                      <td className="px-6 py-4 whitespace-nowrap flex items-center">
-                        <div className={`flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-dark-main-bg ${getIconColor(project.language)}`}>
-                          <FontAwesomeIcon icon={project.icon} className="h-6 w-6" />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900 dark:text-dark-text-main">{project.name}</div>
-                          <div className="text-xs text-gray-500 dark:text-dark-text-secondary">{project.fileCount} fichiers</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-dark-text-main text-sm">{project.language}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <div className="text-gray-900 dark:text-dark-text-main">{project.lastRefactored.split(' - ')[0]}</div>
-                        <div className="text-gray-500 dark:text-dark-text-secondary">{project.lastRefactored.split(' - ')[1]}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(project.status)}`}>
-                          {project.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap w-40">
-                        <div className="text-sm font-semibold text-gray-900 dark:text-dark-text-main">{project.improvement}</div>
-                        {project.improvement && (
-                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1 overflow-hidden">
-                            <div
-                              className={`${getImprovementBarClass(project.status)} h-2 rounded-full transition-all duration-500`}
-                              style={{ width: project.improvement.replace('%', '').replace('+', '') + '%' }}
-                            ></div>
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end space-x-4">
-                          <a href="#" className="inline-flex items-center gap-2 text-indigo-600 dark:text-dark-link hover:text-indigo-800 dark:hover:text-white transition-all duration-200 hover:scale-105">
-                            <FontAwesomeIcon icon={faEye} className="text-base" />
-                            <span className="text-sm font-medium">Voir</span>
-                          </a>
-                          <a href="#" className="inline-flex items-center gap-2 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-white transition-all duration-200 hover:scale-105">
-                            <FontAwesomeIcon icon={faDownload} className="text-base" />
-                            <span className="text-sm font-medium">Télécharger</span>
-                          </a>
-                        </div>
-                      </td>
+              {loading ? (
+                <div className="flex items-center justify-center p-10">
+                  <FontAwesomeIcon icon={faSpinner} className="fa-spin text-4xl text-indigo-500" />
+                  <span className="ml-4 text-lg text-gray-600 dark:text-dark-text-secondary">Chargement de l&apos;historique...</span>
+                </div>
+              ) : error ? (
+                <div className="flex items-center justify-center p-10 text-red-500">
+                  <FontAwesomeIcon icon={faExclamationCircle} className="text-4xl" />
+                  <span className="ml-4 text-lg">Erreur: {error}</span>
+                </div>
+              ) : (
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
+                  <thead className="bg-gray-100 dark:bg-dark-card-bg">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Nom du projet</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Langage</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Statut</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Amélioration</th>
+                      <th className="px-6 py-3"></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="bg-white dark:bg-dark-card-bg divide-y divide-gray-200 dark:divide-dark-border">
+                    {paginatedData.map((project) => (
+                      <tr key={project.id} className="hover:bg-gray-50 dark:hover:bg-dark-main-bg transition-colors duration-200 cursor-pointer">
+                        <td className="px-6 py-4 whitespace-nowrap flex items-center">
+                          <div className={`flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-dark-main-bg ${getIconColor(project.language)}`}>
+                            {project.icon && <FontAwesomeIcon icon={project.icon} className="h-6 w-6" />}
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900 dark:text-dark-text-main">{project.name}</div>
+                            <div className="text-xs text-gray-500 dark:text-dark-text-secondary">{project.fileCount} fichiers</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-dark-text-main text-sm">{project.language}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <div className="text-gray-900 dark:text-dark-text-main">{new Date(project.lastRefactored).toLocaleDateString()}</div>
+                          <div className="text-gray-500 dark:text-dark-text-secondary">{new Date(project.lastRefactored).toLocaleTimeString()}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(project.status)}`}>
+                            {project.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap w-40">
+                          <div className="text-sm font-semibold text-gray-900 dark:text-dark-text-main">{project.improvement}</div>
+                          {project.improvement && (
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1 overflow-hidden">
+                              <div
+                                className={`${getImprovementBarClass(project.status)} h-2 rounded-full transition-all duration-500`}
+                                style={{ width: `${project.improvement.replace(/[+%]/g, '')}%` }}
+                              ></div>
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <div className="flex items-center justify-end space-x-4">
+                            <a href="#" className="inline-flex items-center gap-2 text-indigo-600 dark:text-dark-link hover:text-indigo-800 dark:hover:text-white transition-all duration-200 hover:scale-105">
+                              <FontAwesomeIcon icon={faEye} className="text-base" />
+                              <span className="text-sm font-medium">Voir</span>
+                            </a>
+                            <a href="#" className="inline-flex items-center gap-2 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-white transition-all duration-200 hover:scale-105">
+                              <FontAwesomeIcon icon={faDownload} className="text-base" />
+                              <span className="text-sm font-medium">Télécharger</span>
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
 
             <div className="bg-gray-50 dark:bg-dark-card-bg px-6 py-3 flex items-center justify-between border-t border-gray-200 dark:border-dark-border">

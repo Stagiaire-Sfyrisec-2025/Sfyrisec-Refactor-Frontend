@@ -23,3 +23,16 @@ export const uploadAndAnalyseFiles = async (files: UploadedFile[], options: Refa
 
   return response.json();
 };
+
+export const getHistory = async (): Promise<any> => {
+  const response = await fetch('http://localhost:8000/api/v1/history/', {
+    method: 'GET',
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody}`);
+  }
+
+  return response.json();
+};
