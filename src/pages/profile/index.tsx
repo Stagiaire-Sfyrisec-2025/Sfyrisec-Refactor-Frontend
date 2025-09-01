@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera, faSave, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import LanguageChart from '@/components/LanguageChart';
 import ProjectsChart from '@/components/ProjectsChart';
+import { RefactoringHistoryContext } from '@/context/RefactoringHistoryContext';
 
 const ProfilePage = () => {
+  const { history } = useContext(RefactoringHistoryContext);
   const [isEditMode, setIsEditMode] = useState(false);
   const [profile, setProfile] = useState({
     fullName: 'Rojo',
@@ -197,13 +199,13 @@ const ProfilePage = () => {
           <div className="bg-gray-100 dark:bg-dark-main-bg p-6 rounded-lg">
             <h4 className="text-xl font-semibold text-gray-700 dark:text-dark-text-main mb-4">Répartition par langage</h4>
             <div className="h-64 flex items-center justify-center">
-              <LanguageChart />
+              <LanguageChart history={history} />
             </div>
           </div>
           <div className="bg-gray-100 dark:bg-dark-main-bg p-6 rounded-lg">
             <h4 className="text-xl font-semibold text-gray-700 dark:text-dark-text-main mb-4">Projets par mois</h4>
             <div className="h-64 flex items-center justify-center">
-              <ProjectsChart />
+              <ProjectsChart history={history} />
             </div>
           </div>
         </div>

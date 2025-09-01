@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useContext, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileCode, faArrowUp, faBug, faChartLine, faClock } from '@fortawesome/free-solid-svg-icons';
 import { faJs, faPython, faJava, faPhp } from '@fortawesome/free-brands-svg-icons';
-import Chart from 'chart.js/auto';
 import ProjectCard from '../../components/ProjectCard';
+import LanguageChart from '../../components/LanguageChart';
+import ProjectsChart from '../../components/ProjectsChart';
 import Sheet from '@mui/joy/Sheet';
 import Typography from '@mui/joy/Typography';
 import Box from '@mui/joy/Box';
@@ -19,174 +20,6 @@ const DashboardPage = () => {
     complexityReduced: 0,
     timeSaved: 0, // Placeholder
   });
-  const refactorChartRef = useRef<HTMLCanvasElement | null>(null);
-  const languageChartRef = useRef<HTMLCanvasElement | null>(null);
-  const refactorChartInstance = useRef<Chart | null>(null);
-  const languageChartInstance = useRef<Chart | null>(null);
-
-  useEffect(() => {
-    const isDark = mode === 'dark';
-    const textColor = isDark ? '#e1e4e8' : '#374151';
-    const gridColor = isDark ? 'rgba(68, 75, 84, 0.5)' : 'rgba(209, 213, 219, 0.5)';
-
-    if (refactorChartInstance.current) refactorChartInstance.current.destroy();
-    if (languageChartInstance.current) languageChartInstance.current.destroy();
-
-    if (refactorChartRef.current) {
-      const last7Days = Array.from({ length: 7 }).map((_, i) => {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        return d.toLocaleDateString();
-      }).reverse();
-
-      const projectsByDate = history.reduce((acc, entry) => {
-        const date = entry.timestamp.toLocaleDateString();
-        if (last7Days.includes(date)) {
-          acc[date] = (acc[date] || 0) + 1;
-        }
-        return acc;
-      }, {} as { [key: string]: number });
-
-      const chartData = last7Days.map(date => projectsByDate[date] || 0);
-
-      const refactorCtx = refactorChartRef.current.getContext('2d');
-      if (refactorCtx) {
-        refactorChartInstance.current = new Chart(refactorCtx, {
-          type: 'line',
-          data: {
-            labels: last7Days,
-            datasets: [{
-              label: 'Projets refactorisés (7 derniers jours)',
-              data: chartData,
-              borderColor: isDark ? '#58a6ff' : '#3b82f6',
-              backgroundColor: isDark ? 'rgba(88, 166, 255, 0.2)' : 'rgba(59, 130, 246, 0.2)',
-              tension: 0.4,
-              fill: true,
-              pointBackgroundColor: '#fff',
-              pointBorderColor: isDark ? '#58a6ff' : '#3b82f6',
-              pointRadius: 5,
-              pointHoverRadius: 7,
-            }],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: true,
-                position: 'top',
-                labels: {
-                  color: textColor,
-                  font: {
-                    size: 14,
-                  },
-                },
-              },
-              tooltip: {
-                backgroundColor: isDark ? '#161b22' : '#fff',
-                titleColor: isDark ? '#e1e4e8' : '#000',
-                bodyColor: isDark ? '#c9d1d9' : '#545454',
-                borderColor: isDark ? '#30363d' : '#ccc',
-                borderWidth: 1,
-              },
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                grid: {
-                  color: gridColor,
-                },
-                ticks: {
-                  color: textColor,
-                },
-              },
-              x: {
-                grid: {
-                  color: gridColor,
-                },
-                ticks: {
-                  color: textColor,
-                },
-              },
-            },
-            animation: {
-              duration: 1000,
-              easing: 'easeInOutQuart',
-            },
-          },
-        });
-      }
-    }
-
-    if (languageChartRef.current) {
-      const projectsByLanguage = history.reduce((acc, entry) => {
-        const lang = entry.options.mainLanguage || 'Unknown';
-        acc[lang] = (acc[lang] || 0) + 1;
-        return acc;
-      }, {} as { [key: string]: number });
-
-      const languageCtx = languageChartRef.current.getContext('2d');
-      if (languageCtx) {
-        languageChartInstance.current = new Chart(languageCtx, {
-          type: 'doughnut',
-          data: {
-            labels: Object.keys(projectsByLanguage),
-            datasets: [{
-              data: Object.values(projectsByLanguage),
-              backgroundColor: [
-                '#3f89c56e',
-                '#483fc56e',
-                '#f3a812b4',
-                '#a8dadcc4',
-                '#e6394785'
-              ],
-              borderColor: [
-                '#3f89c5ff',
-                '#483fc5ff',
-                '#f3a812ff',
-                '#a8dadcff',
-                '#e63947ff'
-              ],
-              borderWidth: 1,
-              hoverOffset: 30,
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'right',
-                labels: {
-                  color: textColor,
-                  font: {
-                    size: 14,
-                  },
-                },
-              },
-              tooltip: {
-                backgroundColor: isDark ? '#161b22' : '#fff',
-                titleColor: isDark ? '#e1e4e8' : '#000',
-                bodyColor: isDark ? '#c9d1d9' : '#545454',
-                borderColor: isDark ? '#30363d' : '#ccc',
-                borderWidth: 1,
-              },
-            },
-            cutout: '70%',
-            animation: {
-              duration: 1000,
-              easing: 'easeInOutQuart',
-            },
-          },
-        });
-      }
-    }
-
-    return () => {
-      if (refactorChartInstance.current) refactorChartInstance.current.destroy();
-      if (languageChartInstance.current) languageChartInstance.current.destroy();
-    };
-  }, [mode, history]);
 
   useEffect(() => {
     if (history.length > 0) {
@@ -278,7 +111,7 @@ const DashboardPage = () => {
                 Évolution des refactorisations
               </Typography>
               <div className="h-64">
-                <canvas ref={refactorChartRef} id="refactorChart" className="w-full h-full"></canvas>
+                <ProjectsChart history={history} />
               </div>
             </Sheet>
             <Sheet variant="outlined" sx={{ p: 3, borderRadius: 'lg', bgcolor: 'background.surface', backgroundColor: mode === 'dark' ? '#161b22' : '' }}>
@@ -286,7 +119,7 @@ const DashboardPage = () => {
                 Répartition par langage
               </Typography>
                <div style={{ position: 'relative', height: '300px', width: '350px', margin: '0 auto' }}>
-                <canvas ref={languageChartRef} id="languageChart" className="w-full h-full"></canvas>
+                <LanguageChart history={history} />
               </div>
             </Sheet>
           </Box>
