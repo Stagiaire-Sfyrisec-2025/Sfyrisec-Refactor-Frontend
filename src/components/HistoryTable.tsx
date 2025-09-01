@@ -3,9 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faJs, faPython, faJava, faPhp } from '@fortawesome/free-brands-svg-icons';
 import { faDownload, faEye, faSpinner, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 import { Project } from '../types/project';
+import { HistoryEntry } from '../context/RefactoringHistoryContext';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid';
 import HistoryChart from './HistoryChart';
-import { getHistory } from '../services/api'; 
 
 const getLanguageIcon = (language: string) => {
   switch (language.toLowerCase()) {
@@ -18,7 +18,7 @@ const getLanguageIcon = (language: string) => {
     case 'php':
       return faPhp;
     default:
-      return faJs; 
+      return faJs; // Default icon
   }
 };
 
@@ -59,29 +59,42 @@ const HistoryTable = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        setLoading(true);
-        const data = await getHistory();
-        // Ensure icon is attached to each project
-        const dataWithIcons = data.map((project: Project) => ({
-          ...project,
-          icon: getLanguageIcon(project.language),
-        }));
-        setHistoryData(dataWithIcons);
-        setError(null);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('An unknown error occurred');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
+    try {
+      setLoading(true);
+      const storedHistory = sessionStorage.getItem('refactoringHistory');
+      if (storedHistory) {
+        const parsedHistory: HistoryEntry[] = JSON.parse(storedHistory);
+        const transformedHistory: Project[] = parsedHistory.map((entry: HistoryEntry) => {
+          const language = entry.options?.mainLanguage || 'Unknown';
+          const initialComplexity = entry.initialAnalysis?.summary?.cyclomaticComplexity || 0;
+          const refactoredComplexity = entry.refactoredAnalysis?.summary?.cyclomaticComplexity || 0;
+          const improvement = initialComplexity > 0
+            ? Math.round(((initialComplexity - refactoredComplexity) / initialComplexity) * 100)
+            : 0;
 
-    fetchHistory();
+          return {
+            id: entry.id,
+            name: entry.projectName,
+            language: language,
+            lastRefactored: new Date(entry.timestamp).toISOString(),
+            status: 'Terminé', // Assuming all entries are completed refactors
+            improvement: `+${improvement}%`,
+            fileCount: entry.initialAnalysis?.files?.length || 0,
+            icon: getLanguageIcon(language),
+          };
+        });
+        setHistoryData(transformedHistory);
+      }
+      setError(null);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const totalPages = Math.ceil(historyData.length / ITEMS_PER_PAGE);
