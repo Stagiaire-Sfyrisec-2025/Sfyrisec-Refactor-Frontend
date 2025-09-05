@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import RefactorForm from '@/components/RefactorForm';
 import ResultsDisplay from '@/components/ResultsDisplay';
 import { UploadedFile, RefactorOptions } from '@/types/project';
-import { uploadAndAnalyseFiles } from '@/services/api';
+import { uploadFiles, analyzeCode, refactorCode } from '@/services/api';
 import { transformAnalysisReport } from '@/utils/transformAnalysis';
 import { RefactoringHistoryContext } from '@/context/RefactoringHistoryContext';
 
@@ -14,6 +14,9 @@ const RefactorPage = () => {
   const [projectName, setProjectName] = useState<string>('');
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [initialAnalysis, setInitialAnalysis] = useState<any>(null); // To store the 'before' state
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [originalCode, setOriginalCode] = useState<string>('');
+  const [refactoredCode, setRefactoredCode] = useState<string>('');
   const { addHistoryEntry } = useContext(RefactoringHistoryContext);
   const [options, setOptions] = useState<RefactorOptions>({
     level: 'Standard (recommandé)',
@@ -49,41 +52,63 @@ const RefactorPage = () => {
   const handleAnalysisStart = async () => {
     setStatus('analyzing');
     try {
-      const result = await uploadAndAnalyseFiles(selectedFiles, options);
-      const transformedResult = transformAnalysisReport(result);
+      // Étape 1: Charger les fichiers pour obtenir un ID de session
+      const uploadResult = await uploadFiles(selectedFiles, options);
+      if (!uploadResult.session_id) {
+        throw new Error("ID de session non trouvé dans la réponse d'upload");
+      }
+      const newSessionId = uploadResult.session_id;
+      setSessionId(newSessionId);
+
+      // Étape 2: Appeler l'endpoint d'analyse avec l'ID de session
+      const analysisResultData = await analyzeCode(newSessionId);
+
+      // Utiliser `analysisResultData.analysis` si la réponse est structurée ainsi
+      const transformedResult = transformAnalysisReport(analysisResultData.analysis || analysisResultData);
       setAnalysisResult(transformedResult);
-      setInitialAnalysis(transformedResult); // Save the initial state
+      setInitialAnalysis(transformedResult);
       setStatus('analyzed');
     } catch (error) {
-      console.error('Failed to analyse code:', error);
+      console.error("Échec de l'analyse du code:", error);
       setAnalysisResult(null);
       setStatus('error');
     }
   };
 
   const handleRefactorStart = async () => {
+    if (!sessionId) {
+      console.error('No session ID found for refactoring');
+      setStatus('error');
+      return;
+    }
+
     setStatus('refactoring');
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const refactorResult = await refactorCode(sessionId);
+      const transformedResult = transformAnalysisReport(refactorResult.analysis);
 
-    const refactoredResult = { ...analysisResult };
-    refactoredResult.summary = {
-      ...refactoredResult.summary,
-      cyclomaticComplexity: Math.floor(analysisResult.summary.cyclomaticComplexity * 0.7),
-      deadCode: Math.floor(analysisResult.summary.deadCode * 0.2),
-      redundancy: Math.floor(analysisResult.summary.redundancy * 0.3),
-      conventionIssues: Math.floor(analysisResult.summary.conventionIssues * 0.5),
-    };
+      setOriginalCode(refactorResult.originalCode);
+      setRefactoredCode(refactorResult.refactoredCode);
 
-    addHistoryEntry({
-      initialAnalysis,
-      refactoredAnalysis: refactoredResult,
-      options,
-      projectName: projectName || 'Projet sans nom',
-    });
+      const finalOptions = { ...options };
+      if (options.mainLanguage === 'Détection automatique') {
+        finalOptions.mainLanguage = analysisResult.detectedLanguage || 'Unknown';
+      }
 
-    setAnalysisResult(refactoredResult);
-    setStatus('refactored');
+      addHistoryEntry({
+        initialAnalysis,
+        refactoredAnalysis: transformedResult,
+        options: finalOptions,
+        projectName: projectName || 'Projet sans nom',
+      });
+
+      setAnalysisResult(transformedResult);
+      setStatus('refactored');
+    } catch (error) {
+      console.error('Failed to refactor code:', error);
+      setStatus('error');
+    }
   };
 
   const handleReset = () => {
@@ -92,6 +117,8 @@ const RefactorPage = () => {
     setProjectName('');
     setAnalysisResult(null);
     setInitialAnalysis(null);
+    setOriginalCode('');
+    setRefactoredCode('');
   };
 
   if (['analyzing', 'analyzed', 'refactoring', 'refactored', 'error'].includes(status)) {
@@ -103,6 +130,8 @@ const RefactorPage = () => {
         onRefactor={handleRefactorStart}
         options={options}
         onOptionChange={handleOptionChange}
+        originalCode={originalCode}
+        refactoredCode={refactoredCode}
       />
     );
   }

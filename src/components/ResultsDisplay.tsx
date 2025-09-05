@@ -68,9 +68,11 @@ interface ResultsDisplayProps {
   onRefactor: () => void;
   options: RefactorOptions;
   onOptionChange: (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => void;
+  originalCode?: string;
+  refactoredCode?: string;
 }
 
-const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ status, onReset, analysisResult, onRefactor, options, onOptionChange }) => {
+const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ status, onReset, analysisResult, onRefactor, options, onOptionChange, originalCode, refactoredCode }) => {
   if (status === 'error') {
     return (
       <div className="p-6 text-center">
@@ -89,8 +91,6 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ status, onReset, analys
 
   const summary = analysisResult?.summary;
   const fileDetails = analysisResult?.fileDetails;
-  const originalCode = analysisResult?.originalCode;
-  const refactoredCode = analysisResult?.refactoredCode;
 
   const getTitle = () => {
     switch (status) {

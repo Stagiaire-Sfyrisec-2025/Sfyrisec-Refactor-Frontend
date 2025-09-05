@@ -31,7 +31,15 @@ export const RefactoringHistoryProvider: React.FC<RefactoringHistoryProviderProp
   const [history, setHistory] = useState<HistoryEntry[]>(() => {
     try {
       const storedHistory = sessionStorage.getItem('refactoringHistory');
-      return storedHistory ? JSON.parse(storedHistory) : [];
+      if (storedHistory) {
+        const parsed = JSON.parse(storedHistory);
+        // Convert timestamp strings back to Date objects
+        return parsed.map((entry: any) => ({
+          ...entry,
+          timestamp: new Date(entry.timestamp),
+        }));
+      }
+      return [];
     } catch (error) {
       console.error("Failed to parse history from sessionStorage", error);
       return [];

@@ -1,6 +1,6 @@
 import { UploadedFile, RefactorOptions } from '../types/project';
 
-export const uploadAndAnalyseFiles = async (files: UploadedFile[], options: RefactorOptions): Promise<any> => {
+export const uploadFiles = async (files: UploadedFile[], options: RefactorOptions): Promise<any> => {
   const formData = new FormData();
 
   files.forEach(file => {
@@ -17,6 +17,32 @@ export const uploadAndAnalyseFiles = async (files: UploadedFile[], options: Refa
 
   if (!response.ok) {
     // Try to get error details from the body
+    const errorBody = await response.text();
+    throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody}`);
+  }
+
+  return response.json();
+};
+
+export const analyzeCode = async (sessionId: string): Promise<any> => {
+  const response = await fetch(`http://localhost:8000/api/v1/analyze/${sessionId}`, {
+    method: 'GET',
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody}`);
+  }
+
+  return response.json();
+};
+
+export const refactorCode = async (sessionId: string): Promise<any> => {
+  const response = await fetch(`http://localhost:8000/api/v1/refactor/${sessionId}`, {
+    method: 'GET',
+  });
+
+  if (!response.ok) {
     const errorBody = await response.text();
     throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody}`);
   }
