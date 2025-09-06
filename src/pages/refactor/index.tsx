@@ -86,8 +86,13 @@ const RefactorPage = () => {
 
     try {
       const refactorResult = await refactorCode(sessionId);
+
+      // This is the critical change:
+      // The analysis report is now in a nested object.
       const transformedResult = transformAnalysisReport(refactorResult.analysis);
 
+      // Set all state variables from the new API response structure
+      setAnalysisResult(transformedResult);
       setOriginalCode(refactorResult.originalCode);
       setRefactoredCode(refactorResult.refactoredCode);
 
@@ -103,7 +108,6 @@ const RefactorPage = () => {
         projectName: projectName || 'Projet sans nom',
       });
 
-      setAnalysisResult(transformedResult);
       setStatus('refactored');
     } catch (error) {
       console.error('Failed to refactor code:', error);

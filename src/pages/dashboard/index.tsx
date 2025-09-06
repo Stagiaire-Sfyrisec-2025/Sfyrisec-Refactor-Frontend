@@ -1,7 +1,7 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useEffect, useRef, useContext, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileCode, faArrowUp, faBug, faChartLine, faClock } from '@fortawesome/free-solid-svg-icons';
-import { faPython } from '@fortawesome/free-brands-svg-icons';
+import { faJs, faPython, faJava, faPhp } from '@fortawesome/free-brands-svg-icons';
 import ProjectCard from '../../components/ProjectCard';
 import LanguageChart from '../../components/LanguageChart';
 import ProjectsChart from '../../components/ProjectsChart';
@@ -18,7 +18,7 @@ const DashboardPage = () => {
     projectsRefactored: 0,
     problemsSolved: 0,
     complexityReduced: 0,
-    timeSaved: 0,
+    timeSaved: 0, // Placeholder
   });
 
   useEffect(() => {
@@ -28,18 +28,8 @@ const DashboardPage = () => {
       let complexityReduced = 0;
 
       history.forEach(entry => {
-        const initial = entry.initialAnalysis?.summary || {
-          deadCode: 0,
-          redundancy: 0,
-          conventionIssues: 0,
-          cyclomaticComplexity: 0
-        };
-        const refactored = entry.refactoredAnalysis?.summary || {
-          deadCode: 0,
-          redundancy: 0,
-          conventionIssues: 0,
-          cyclomaticComplexity: 0
-        };
+        const initial = entry.initialAnalysis.summary;
+        const refactored = entry.refactoredAnalysis.summary;
 
         problemsSolved += (initial.deadCode - refactored.deadCode);
         problemsSolved += (initial.redundancy - refactored.redundancy);
@@ -51,7 +41,7 @@ const DashboardPage = () => {
         projectsRefactored,
         problemsSolved,
         complexityReduced,
-        timeSaved: Math.round(complexityReduced * 0.5),
+        timeSaved: Math.round(complexityReduced * 0.5) // Placeholder logic
       });
     }
   }, [history]);
@@ -59,9 +49,9 @@ const DashboardPage = () => {
   const recentProjectsData = history.slice(-5).map(entry => ({
     id: entry.id,
     name: entry.projectName,
-    langIcon: faPython,
+    langIcon: faPython, // Assuming python for now
     langColor: 'text-blue-400',
-    time: new Date(entry.timestamp).toLocaleDateString(),
+    time: entry.timestamp.toLocaleDateString(),
     status: 'Terminé',
     statusColor: 'bg-green-100 dark:bg-gray-700 text-green-800 dark:text-green-400',
     iconBg: 'bg-blue-100 dark:bg-gray-800',
@@ -87,8 +77,8 @@ const DashboardPage = () => {
               <Sheet key={index} variant="outlined" sx={{ borderRadius: 'lg', overflow: 'hidden', bgcolor: 'background.surface', backgroundColor: mode === 'dark' ? '#161b22' : '' }}>
                 <Box sx={{ p: 2.5 }}>
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 rounded-md p-3" style={{ backgroundColor: stat.bgColor }}>
-                      <FontAwesomeIcon icon={stat.icon} style={{ color: stat.color }} />
+                    <div className="flex-shrink-0 rounded-md p-3" style={{ backgroundColor: mode === 'dark' ? stat.bgColor : stat.bgColor }}>
+                      <FontAwesomeIcon icon={stat.icon} style={{ color: mode === 'dark' ? stat.color : stat.color }} />
                     </div>
                     <div className="ml-5 w-0 flex-1">
                       <dl>
@@ -99,6 +89,13 @@ const DashboardPage = () => {
                           <Typography component="div" className="text-2xl font-semibold" sx={{ color: mode === 'dark' ? '#e1e4e8' : '#1b1f23' }}>
                             {stat.value}
                           </Typography>
+                          {stat.change && (
+                            <div className="ml-2 flex items-baseline text-sm font-semibold" style={{ color: mode === 'dark' ? '#3fb950' : stat.color }}>
+                              <FontAwesomeIcon icon={faArrowUp} className="text-xs self-center" />
+                              <span className="sr-only">Increased by</span>
+                              {stat.change}
+                            </div>
+                          )}
                         </dd>
                       </dl>
                     </div>
@@ -121,7 +118,7 @@ const DashboardPage = () => {
               <Typography level="h4" component="h3" sx={{ color: mode === 'dark' ? '#e1e4e8' : '#1b1f23' }}>
                 Répartition par langage
               </Typography>
-              <div style={{ position: 'relative', height: '300px', width: '350px', margin: '0 auto' }}>
+               <div style={{ position: 'relative', height: '300px', width: '350px', margin: '0 auto' }}>
                 <LanguageChart history={history} />
               </div>
             </Sheet>

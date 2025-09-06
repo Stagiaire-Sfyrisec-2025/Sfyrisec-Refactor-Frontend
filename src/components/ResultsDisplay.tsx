@@ -73,6 +73,34 @@ interface ResultsDisplayProps {
 }
 
 const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ status, onReset, analysisResult, onRefactor, options, onOptionChange, originalCode, refactoredCode }) => {
+  const handleDownloadReport = () => {
+    if (!analysisResult) return;
+    const reportJson = JSON.stringify(analysisResult, null, 2);
+    const blob = new Blob([reportJson], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'refactor_report.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadCode = () => {
+    if (!refactoredCode) return;
+    const fileName = analysisResult?.fileDetails?.[0]?.fileName ? `refactored_${analysisResult.fileDetails[0].fileName}` : 'refactored_code.txt';
+    const blob = new Blob([refactoredCode], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   if (status === 'error') {
     return (
       <div className="p-6 text-center">
@@ -136,12 +164,14 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ status, onReset, analys
                     <>
                       <button
                         type="button"
+                        onClick={handleDownloadReport}
                         className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-dark-border shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-dark-text-secondary bg-white dark:bg-dark-btn-secondary hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 mr-2"
                       >
                         <FontAwesomeIcon icon={faDownload} className="mr-2 h-4 w-4" /> Télécharger le rapport
                       </button>
                       <button
                         type="button"
+                        onClick={handleDownloadCode}
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-dark-btn-primary hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                       >
                         <FontAwesomeIcon icon={faCode} className="mr-2 h-4 w-4" /> Télécharger le code
