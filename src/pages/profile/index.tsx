@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera, faSave, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
@@ -53,7 +54,7 @@ const ProfilePage = () => {
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/3">
             <div className="flex flex-col items-center bg-gray-100 dark:bg-dark-main-bg p-6 rounded-lg">
-              <img src={profile.avatar} alt="Profile" className="rounded-full w-32 h-32 mb-4 border-4 border-white dark:border-dark-border shadow-sm" />
+              <Image src={profile.avatar} alt="Profile" className="rounded-full w-32 h-32 mb-4 border-4 border-white dark:border-dark-border shadow-sm" />
               <input
                 type="file"
                 id="avatar-upload"
