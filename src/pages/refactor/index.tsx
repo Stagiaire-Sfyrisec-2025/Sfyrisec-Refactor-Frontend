@@ -19,7 +19,7 @@ const RefactorPage = () => {
   const [refactoredCode, setRefactoredCode] = useState<string>('');
   const { addHistoryEntry } = useContext(RefactoringHistoryContext);
   const [options, setOptions] = useState<RefactorOptions>({
-    level: 'Standard (recommandé)',
+    level: 'Standard',
     mainLanguage: 'Détection automatique',
     addComments: false,
     optimizeVariableNames: false,
@@ -32,6 +32,7 @@ const RefactorPage = () => {
       id: crypto.randomUUID(),
       name: file.name,
       size: file.size,
+      type: file.type,
       rawFile: file,
     }));
     setSelectedFiles(prev => [...prev, ...mapped]);
@@ -42,11 +43,19 @@ const RefactorPage = () => {
   };
 
   const handleOptionChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setOptions(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    const { name, value, type } = e.target;
+    if (type === 'checkbox') {
+      const { checked } = e.target as HTMLInputElement;
+      setOptions(prev => ({
+        ...prev,
+        [name]: checked,
+      }));
+    } else {
+      setOptions(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleAnalysisStart = async () => {

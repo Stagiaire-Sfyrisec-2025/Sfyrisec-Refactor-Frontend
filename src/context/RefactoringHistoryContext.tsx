@@ -28,23 +28,22 @@ interface RefactoringHistoryProviderProps {
 }
 
 export const RefactoringHistoryProvider: React.FC<RefactoringHistoryProviderProps> = ({ children }) => {
-  const [history, setHistory] = useState<HistoryEntry[]>(() => {
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+
+  useEffect(() => {
     try {
       const storedHistory = sessionStorage.getItem('refactoringHistory');
       if (storedHistory) {
         const parsed = JSON.parse(storedHistory);
-        // Convert timestamp strings back to Date objects
-        return parsed.map((entry: any) => ({
+        setHistory(parsed.map((entry: any) => ({
           ...entry,
           timestamp: new Date(entry.timestamp),
-        }));
+        })));
       }
-      return [];
     } catch (error) {
       console.error("Failed to parse history from sessionStorage", error);
-      return [];
     }
-  });
+  }, []);
 
   useEffect(() => {
     try {

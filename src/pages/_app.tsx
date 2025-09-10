@@ -32,8 +32,7 @@ const customTheme = extendTheme({
     dark: {
       palette: {
         primary: {
-          '500': '#6366F1', 
-          main: '#6366F1',
+          '500': '#6366F1',
           solidBg: '#6366F1',
           solidHoverBg: '#5255D4',
           solidActiveBg: '#4144B7',
@@ -64,8 +63,6 @@ const customTheme = extendTheme({
       },
     },
   },
-
-  defaultColorScheme: 'dark',
 
 });
 
@@ -115,7 +112,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <AuthProvider>
       <RefactoringHistoryProvider>
-        <CssVarsProvider theme={customTheme} disableTransitionOnChange>
+        <CssVarsProvider theme={customTheme} defaultColorScheme="dark" disableTransitionOnChange>
           <ThemeApplicator>
             <CssBaseline />
             <Head>

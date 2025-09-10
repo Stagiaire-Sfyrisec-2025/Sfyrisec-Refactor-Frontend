@@ -62,7 +62,7 @@ const SummaryCard = ({ icon, label, value, color }: { icon: any, label: string, 
 };
 
 interface ResultsDisplayProps {
-  status: 'analyzing' | 'analyzed' | 'refactoring' | 'refactored' | 'error';
+  status: 'idle' | 'analyzing' | 'analyzed' | 'refactoring' | 'refactored' | 'error';
   onReset: () => void;
   analysisResult: any;
   onRefactor: () => void;
@@ -314,7 +314,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ status, onReset, analys
                         <input
                           type="checkbox"
                           name={opt.id}
-                          checked={options[opt.id as keyof RefactorOptions]}
+                          checked={!!options[opt.id as keyof RefactorOptions]}
                           onChange={onOptionChange}
                           className="mt-1 h-5 w-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
                         />

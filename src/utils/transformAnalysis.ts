@@ -51,7 +51,7 @@ export const transformAnalysisReport = (report: any): any => {
     fileDetails.push({
       fileName: filePath.split('/').pop() || filePath,
       language: lang,
-      type: 'Analysé',
+      type: 'Non modifié',
       changesSummary: `Complexité: ${complexity}, Redondance: ${redundancy}`,
       details: `Problèmes de convention: ${convention}, Code mort: ${deadCode}`,
       status: 'Succès', // Assuming success if analysis ran

@@ -13,6 +13,7 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Textarea,
 } from '@mui/joy';
 import { Edit, Close } from '@mui/icons-material';
 
@@ -56,7 +57,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, onClose }) => {
                   sx={{ width: 100, height: 100 }}
                 />
                 <IconButton
-                  size="small"
+                  size="sm"
                   sx={{
                     position: 'absolute',
                     bottom: 0,
@@ -103,9 +104,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, onClose }) => {
                   </FormControl>
                   <FormControl>
                     <FormLabel>Bio</FormLabel>
-                    <Input
+                    <Textarea
                       placeholder="Courte description du développeur."
-                      multiline
                       minRows={4}
                       sx={{ borderRadius: 'md' }}
                     />

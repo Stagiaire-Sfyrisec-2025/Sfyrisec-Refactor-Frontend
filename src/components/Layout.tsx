@@ -10,7 +10,11 @@ import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 
-const Layout = ({ children }) => {
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { isAuthenticated, user, login, logout, isLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
