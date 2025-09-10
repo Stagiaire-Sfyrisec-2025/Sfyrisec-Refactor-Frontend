@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera, faSave, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
-import LanguageChart from '../components/LanguageChart';
-import ProjectsChart from '../components/ProjectsChart';
+import LanguageChart from '@/components/LanguageChart';
+import ProjectsChart from '@/components/ProjectsChart';
+import { RefactoringHistoryContext } from '@/context/RefactoringHistoryContext';
 
 const ProfilePage = () => {
+  const { history } = useContext(RefactoringHistoryContext);
   const [isEditMode, setIsEditMode] = useState(false);
   const [profile, setProfile] = useState({
     fullName: 'Rojo',
-    username: 'Rojodoe',
-    email: 'Rojo.doe@example.com',
+    username: 'Rojotiana',
+    email: 'Rojo.tiana@example.com',
     phone: '+1 (555) 123-4567',
     bio: "Développeur full-stack avec 5 ans d'expérience. Passionné par les bonnes pratiques de code et l'optimisation des performances.",
     avatar: 'https://via.placeholder.com/150',
@@ -81,11 +83,11 @@ const ProfilePage = () => {
               <h4 className="font-medium text-gray-800 dark:text-dark-text-main mb-2">Liens</h4>
               <div className="flex items-center text-sm text-blue-600 dark:text-dark-link hover:text-blue-800 dark:hover:text-white mb-2">
                 <FontAwesomeIcon icon={faGithub} className="mr-2" />
-                <a href="#" target="_blank">github.com/Rojodoe</a>
+                <a href="#" target="_blank">github.com/Rojotiana</a>
               </div>
               <div className="flex items-center text-sm text-blue-600 dark:text-dark-link hover:text-blue-800 dark:hover:text-white">
                 <i className="fas fa-globe mr-2"></i>
-                <a href="#" target="_blank">portfolio.Rojodoe.dev</a>
+                <a href="#" target="_blank">portfolio.Rojotiana.dev</a>
               </div>
             </div>
           </div>
@@ -110,7 +112,7 @@ const ProfilePage = () => {
                     <input type="text" name="fullName" value={profile.fullName} onChange={handleInputChange} className="w-full border rounded-lg px-3 py-2 bg-white dark:bg-dark-main-bg text-gray-900 dark:text-dark-text-main border-gray-300 dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Nom d'utilisateur</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Nom d&apos;utilisateur</label>
                     <input type="text" name="username" value={profile.username} onChange={handleInputChange} className="w-full border rounded-lg px-3 py-2 bg-white dark:bg-dark-main-bg text-gray-900 dark:text-dark-text-main border-gray-300 dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
@@ -134,7 +136,7 @@ const ProfilePage = () => {
                   <p className="text-gray-800 dark:text-dark-text-main">{profile.fullName}</p>
                 </div>
                 <div className="bg-gray-100 dark:bg-dark-main-bg p-4 rounded-lg">
-                  <p className="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Nom d'utilisateur</p>
+                  <p className="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Nom d&apos;utilisateur</p>
                   <p className="text-gray-800 dark:text-dark-text-main">{profile.username}</p>
                 </div>
                 <div className="bg-gray-100 dark:bg-dark-main-bg p-4 rounded-lg">
@@ -197,13 +199,13 @@ const ProfilePage = () => {
           <div className="bg-gray-100 dark:bg-dark-main-bg p-6 rounded-lg">
             <h4 className="text-xl font-semibold text-gray-700 dark:text-dark-text-main mb-4">Répartition par langage</h4>
             <div className="h-64 flex items-center justify-center">
-              <LanguageChart />
+              <LanguageChart history={history} />
             </div>
           </div>
           <div className="bg-gray-100 dark:bg-dark-main-bg p-6 rounded-lg">
             <h4 className="text-xl font-semibold text-gray-700 dark:text-dark-text-main mb-4">Projets par mois</h4>
             <div className="h-64 flex items-center justify-center">
-              <ProjectsChart />
+              <ProjectsChart history={history} />
             </div>
           </div>
         </div>

@@ -19,7 +19,7 @@ export interface UploadedFile {
   name: string;
   size: number;
   type: string; // MIME type
-  // rawFile: File; // The actual File object
+  rawFile: File; // The actual File object
 }
 
 export interface RefactorOptions {
