@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera, faSave, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import LanguageChart from '@/components/LanguageChart';
 import ProjectsChart from '@/components/ProjectsChart';
+import { RefactoringHistoryContext } from '@/context/RefactoringHistoryContext';
 
 const ProfilePage = () => {
+  const { history } = useContext(RefactoringHistoryContext);
   const [isEditMode, setIsEditMode] = useState(false);
   const [profile, setProfile] = useState({
     fullName: 'Rojo',
@@ -51,7 +54,7 @@ const ProfilePage = () => {
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/3">
             <div className="flex flex-col items-center bg-gray-100 dark:bg-dark-main-bg p-6 rounded-lg">
-              <img src={profile.avatar} alt="Profile" className="rounded-full w-32 h-32 mb-4 border-4 border-white dark:border-dark-border shadow-sm" />
+              <Image src={profile.avatar} alt="Profile" className="rounded-full w-32 h-32 mb-4 border-4 border-white dark:border-dark-border shadow-sm" />
               <input
                 type="file"
                 id="avatar-upload"
@@ -110,7 +113,7 @@ const ProfilePage = () => {
                     <input type="text" name="fullName" value={profile.fullName} onChange={handleInputChange} className="w-full border rounded-lg px-3 py-2 bg-white dark:bg-dark-main-bg text-gray-900 dark:text-dark-text-main border-gray-300 dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Nom d'utilisateur</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Nom d&apos;utilisateur</label>
                     <input type="text" name="username" value={profile.username} onChange={handleInputChange} className="w-full border rounded-lg px-3 py-2 bg-white dark:bg-dark-main-bg text-gray-900 dark:text-dark-text-main border-gray-300 dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
@@ -134,7 +137,7 @@ const ProfilePage = () => {
                   <p className="text-gray-800 dark:text-dark-text-main">{profile.fullName}</p>
                 </div>
                 <div className="bg-gray-100 dark:bg-dark-main-bg p-4 rounded-lg">
-                  <p className="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Nom d'utilisateur</p>
+                  <p className="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Nom d&apos;utilisateur</p>
                   <p className="text-gray-800 dark:text-dark-text-main">{profile.username}</p>
                 </div>
                 <div className="bg-gray-100 dark:bg-dark-main-bg p-4 rounded-lg">
@@ -197,13 +200,13 @@ const ProfilePage = () => {
           <div className="bg-gray-100 dark:bg-dark-main-bg p-6 rounded-lg">
             <h4 className="text-xl font-semibold text-gray-700 dark:text-dark-text-main mb-4">Répartition par langage</h4>
             <div className="h-64 flex items-center justify-center">
-              <LanguageChart />
+              <LanguageChart history={history} />
             </div>
           </div>
           <div className="bg-gray-100 dark:bg-dark-main-bg p-6 rounded-lg">
             <h4 className="text-xl font-semibold text-gray-700 dark:text-dark-text-main mb-4">Projets par mois</h4>
             <div className="h-64 flex items-center justify-center">
-              <ProjectsChart />
+              <ProjectsChart history={history} />
             </div>
           </div>
         </div>

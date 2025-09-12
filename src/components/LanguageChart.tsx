@@ -4,7 +4,11 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const LanguageChart = () => {
+interface LanguageChartProps {
+  history: any[]; // A more specific type should be used here
+}
+
+const LanguageChart: React.FC<LanguageChartProps> = ({ history }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
@@ -23,12 +27,18 @@ const LanguageChart = () => {
     return () => observer.disconnect();
   }, []);
 
+  const projectsByLanguage = history.reduce((acc, entry) => {
+    const lang = entry.options.mainLanguage || 'Unknown';
+    acc[lang] = (acc[lang] || 0) + 1;
+    return acc;
+  }, {} as { [key: string]: number });
+
   const data = {
-    labels: ['JavaScript', 'Python', 'TypeScript', 'Java'],
+    labels: Object.keys(projectsByLanguage),
     datasets: [
       {
         label: 'Répartition par langage',
-        data: [45, 25, 15, 15],
+        data: Object.values(projectsByLanguage),
         backgroundColor: isDarkMode
           ? ['#3f88c5', '#f3a712', '#a8dadc', '#e63946']
           : ['rgba(255, 206, 86, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)'],

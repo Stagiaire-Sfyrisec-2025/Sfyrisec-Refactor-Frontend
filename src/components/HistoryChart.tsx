@@ -29,7 +29,7 @@ const HistoryChart: React.FC<HistoryChartProps> = ({ data }) => {
   }, []);
 
   const chartData = data
-    .filter(p => p.improvement && p.improvement !== '')
+    .filter((p): p is Project & { improvement: string } => typeof p.improvement === 'string' && p.improvement.trim() !== '')
     .map(project => ({
       name: project.name.length > 12 ? project.name.slice(0, 12) + '…' : project.name,
       improvement: parseFloat(project.improvement.replace(/[+%]/g, '')),

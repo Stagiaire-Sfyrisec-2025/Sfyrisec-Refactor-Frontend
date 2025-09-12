@@ -1,7 +1,8 @@
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
-import { AuthProvider } from '../context/AuthContext'; // Import AuthProvider
+import { AuthProvider } from '../context/AuthContext';
+import { RefactoringHistoryProvider } from '../context/RefactoringHistoryContext';
 
 // Font Awesome configuration
 // This ensures that Font Awesome icons work correctly with Next.js SSR and SSG.
@@ -31,8 +32,7 @@ const customTheme = extendTheme({
     dark: {
       palette: {
         primary: {
-          '500': '#6366F1', 
-          main: '#6366F1',
+          '500': '#6366F1',
           solidBg: '#6366F1',
           solidHoverBg: '#5255D4',
           solidActiveBg: '#4144B7',
@@ -63,8 +63,6 @@ const customTheme = extendTheme({
       },
     },
   },
-
-  defaultColorScheme: 'dark',
 
 });
 
@@ -113,24 +111,26 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <AuthProvider>
-      <CssVarsProvider theme={customTheme} disableTransitionOnChange>
-        <ThemeApplicator>
-          <CssBaseline />
-          <Head>
-            <meta charSet="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          </Head>
-          {isLoginPage ? (
-            <Component {...pageProps} />
-          ) : (
-            <AuthGuard>
-              <Layout>
-                <Component {...pageProps} />
-              </Layout>
-            </AuthGuard>
-          )}
-        </ThemeApplicator>
-      </CssVarsProvider>
+      <RefactoringHistoryProvider>
+        <CssVarsProvider theme={customTheme} defaultColorScheme="dark" disableTransitionOnChange>
+          <ThemeApplicator>
+            <CssBaseline />
+            <Head>
+              <meta charSet="UTF-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            </Head>
+            {isLoginPage ? (
+              <Component {...pageProps} />
+            ) : (
+              <AuthGuard>
+                <Layout>
+                  <Component {...pageProps} />
+                </Layout>
+              </AuthGuard>
+            )}
+          </ThemeApplicator>
+        </CssVarsProvider>
+      </RefactoringHistoryProvider>
     </AuthProvider>
   );
 }

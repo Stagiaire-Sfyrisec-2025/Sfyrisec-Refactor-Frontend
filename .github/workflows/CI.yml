@@ -15,6 +15,7 @@ jobs:
   lint:
     name: Lint Code
     runs-on: self-hosted
+
     steps:
       - name: Cleanup workspace
         run: rm -rf ${{ github.workspace }}/* 2>/dev/null || true

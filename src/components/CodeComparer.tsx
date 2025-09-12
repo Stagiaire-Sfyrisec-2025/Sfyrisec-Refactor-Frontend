@@ -1,47 +1,72 @@
 import React from 'react';
+import { diffLines, Change } from 'diff';
 
 interface CodeComparerProps {
-  originalCode?: string;
-  refactoredCode?: string;
+  originalCode: string;
+  refactoredCode: string;
 }
 
-const CodeComparer: React.FC<CodeComparerProps> = ({
-  originalCode = `function processData(data) {
-    let r = [];
-    for (let i = 0; i < data.length; i++) {
-        if (data[i].active) {
-            let t = {
-                n: data[i].name,
-                v: data[i].value * 1.2
-            };
-            r.push(t);
+const CodeComparer: React.FC<CodeComparerProps> = ({ originalCode, refactoredCode }) => {
+  const diffs = diffLines(originalCode, refactoredCode);
+
+  const processDiffs = (diffs: Change[]) => {
+    const originalLines: { content: string; color: string }[] = [];
+    const refactoredLines: { content: string; color: string }[] = [];
+
+    let i = 0;
+    while (i < diffs.length) {
+      const part = diffs[i];
+      const nextPart = diffs[i + 1];
+
+      if (part.removed && nextPart && nextPart.added) {
+        // Modification
+        const removed = part.value.split('\n').filter(Boolean);
+        const added = nextPart.value.split('\n').filter(Boolean);
+        const maxLen = Math.max(removed.length, added.length);
+
+        for (let j = 0; j < maxLen; j++) {
+          if (removed[j]) {
+            originalLines.push({ content: removed[j], color: 'bg-blue-100' });
+          }
+          if (added[j]) {
+            refactoredLines.push({ content: added[j], color: 'bg-blue-100' });
+          }
         }
+        i += 2;
+      } else if (part.added) {
+        const lines = part.value.split('\n').filter(Boolean);
+        lines.forEach(line => {
+          refactoredLines.push({ content: line, color: 'bg-green-100' });
+        });
+        i++;
+      } else if (part.removed) {
+        const lines = part.value.split('\n').filter(Boolean);
+        lines.forEach(line => {
+          originalLines.push({ content: line, color: 'bg-red-100' });
+        });
+        i++;
+      } else {
+        const lines = part.value.split('\n').filter(Boolean);
+        lines.forEach(line => {
+          originalLines.push({ content: line, color: 'bg-transparent' });
+          refactoredLines.push({ content: line, color: 'bg-transparent' });
+        });
+        i++;
+      }
     }
-    return r;
-}
+    return { originalLines, refactoredLines };
+  };
 
-function calc(a, b) {
-    return a + b;
-}`,
-  refactoredCode = `/**
- * Process active items and apply 20% markup
- * @param {Array} items - Array of items to process
- * @returns {Array} Processed items with name and marked up value
- */
-function processActiveItemsWithMarkup(items) {
-    return items
-        .filter(item => item.active)
-        .map(activeItem => ({
-            name: activeItem.name,
-            value: activeItem.value * 1.2
-        }));
-}
+  const { originalLines, refactoredLines } = processDiffs(diffs);
 
-// Unused function removed during refactoring
-// function calc(a, b) {
-//     return a + b;
-// }`
-}) => {
+  const renderLines = (lines: { content: string; color: string }[]) => {
+    return lines.map((line, index) => (
+      <div key={index} className={`${line.color} transition-colors duration-300 ease-in-out`}>
+        {line.content}
+      </div>
+    ));
+  };
+
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden mt-8">
       <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
@@ -61,14 +86,14 @@ function processActiveItemsWithMarkup(items) {
           <div className="w-1/2 border-r border-gray-200">
             <div className="p-4 overflow-auto max-h-96">
               <pre className="code-block text-sm text-gray-800 whitespace-pre-wrap break-all">
-                <code>{originalCode}</code>
+                <code>{renderLines(originalLines)}</code>
               </pre>
             </div>
           </div>
           <div className="w-1/2">
             <div className="p-4 overflow-auto max-h-96">
               <pre className="code-block text-sm text-gray-800 whitespace-pre-wrap break-all">
-                <code>{refactoredCode}</code>
+                <code>{renderLines(refactoredLines)}</code>
               </pre>
             </div>
           </div>

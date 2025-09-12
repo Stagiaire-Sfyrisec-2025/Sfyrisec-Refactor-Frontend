@@ -21,7 +21,11 @@ ChartJS.register(
   Legend
 );
 
-const ProjectsChart = () => {
+interface ProjectsChartProps {
+  history: any[]; // A more specific type should be used here
+}
+
+const ProjectsChart: React.FC<ProjectsChartProps> = ({ history }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
@@ -39,6 +43,22 @@ const ProjectsChart = () => {
 
     return () => observer.disconnect();
   }, []);
+
+  const last7Days = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    return d.toLocaleDateString();
+  }).reverse();
+
+  const projectsByDate = history.reduce((acc, entry) => {
+    const date = entry.timestamp.toLocaleDateString();
+    if (last7Days.includes(date)) {
+      acc[date] = (acc[date] || 0) + 1;
+    }
+    return acc;
+  }, {} as { [key: string]: number });
+
+  const chartData = last7Days.map(date => projectsByDate[date] || 0);
 
   const options = {
     responsive: true,
@@ -75,14 +95,12 @@ const ProjectsChart = () => {
     },
   };
 
-  const labels = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet'];
-
   const data = {
-    labels,
+    labels: last7Days,
     datasets: [
       {
         label: 'Projets',
-        data: [3, 5, 8, 6, 7, 9, 11],
+        data: chartData,
         borderColor: isDarkMode ? '#58a6ff' : 'rgb(53, 162, 235)',
         backgroundColor: isDarkMode ? 'rgba(88, 166, 255, 0.5)' : 'rgba(53, 162, 235, 0.5)',
       },

@@ -88,13 +88,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          backgroundImage:
-            'url(https://techcrunch.com/wp-content/uploads/2015/04/codecode.jpg)',
-            //https://techcrunch.com/wp-content/uploads/2015/04/codecode.jpg
+          backgroundImage: 'url(/images/codecode.jpg)',
           [theme.getColorSchemeSelector('dark')]: {
-            backgroundImage:
-              'url(https://techcrunch.com/wp-content/uploads/2015/04/codecode.jpg)',
+            backgroundImage: 'url(/images/codecode.jpg)',
           },
+          //https://techcrunch.com/wp-content/uploads/2015/04/codecode.jpg
         })}
       />
     </>
