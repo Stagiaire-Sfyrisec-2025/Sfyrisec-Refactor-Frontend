@@ -1,0 +1,17 @@
+# node
+node_modules
+npm-debug.log
+
+# build
+.next
+out
+
+# misc
+.DS_Store
+*.pem
+*.cer
+*.key
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
