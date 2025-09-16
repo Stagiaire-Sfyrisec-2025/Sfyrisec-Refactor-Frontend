@@ -74,8 +74,8 @@ jobs:
             --file Dockerfile \
             --tag job-${{ github.run_id }}:${{ github.sha }} \
             --tag job-${{ github.run_id }}:latest \
-            --tag ${{ secrets.DOCKER_USERNAME }}/sfyrise-ui:latest
+            --tag ${{ secrets.DOCKER_USERNAME }}/sfyrisec-refactor-app-image:latest
 
       - name: Push Docker image to Docker Hub
         if: github.event_name == 'push'
-        run: sudo docker push ${{ secrets.DOCKER_USERNAME }}/sfyrise-ui:latest
+        run: sudo docker push ${{ secrets.DOCKER_USERNAME }}/sfyrisec-refactor-app-image:latest
