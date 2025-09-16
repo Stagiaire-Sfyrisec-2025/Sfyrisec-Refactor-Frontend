@@ -1,14 +1,19 @@
-# Stage 1: Build the Next.js application
-FROM node:20-alpine AS builder
-
-# Set working directory
+# Stage 1: Install dependencies
+FROM node:18-alpine AS deps
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package.json package-lock.json ./
+# Copy package.json and package-lock.json (or yarn.lock)
+COPY package.json package-lock.json* ./
 
 # Install dependencies
 RUN npm install
+
+# Stage 2: Build the application
+FROM node:18-alpine AS builder
+WORKDIR /app
+
+# Copy dependencies from the 'deps' stage
+COPY --from=deps /app/node_modules ./node_modules
 
 # Copy the rest of the application code
 COPY . .
@@ -16,19 +21,23 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Stage 2: Create the production image
-FROM node:20-alpine
-
-# Set working directory
+# Stage 3: Production image
+FROM node:18-alpine AS runner
 WORKDIR /app
 
-# Copy the build output from the builder stage
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+# Set environment variables
+ENV NODE_ENV=production
+
+# Copy the standalone output
+COPY --from=builder /app/.next/standalone ./
+# Copy the static assets
+COPY --from=builder /app/.next/static ./.next/static
+# Copy the public assets
+COPY --from=builder /app/public ./public
 
 # Expose the port the app runs on
 EXPOSE 3000
 
-# Command to start the application
-CMD ["npm", "start"]
+# The command to run the application
+CMD ["node", "server.js"]
+
