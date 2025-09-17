@@ -58,16 +58,16 @@ jobs:
 
       - name: Generate Prime Numbers
         if: steps.cache-primes.outputs.cache-hit != 'true'
-        run: /generate-primes.sh -d prime-numbers
+        run: ./generate-primes.sh -d prime-numbers
 
       - name: Use Prime Numbers
-        run: /primes.sh -d prime-numbers      
+        run: ./primes.sh -d prime-numbers      
 
   # Job 3 : Build
   build:
     name: Build Next.js Application
     runs-on: self-hosted
-    needs: lint, caching
+    needs: [lint, caching]
 
     steps:
       - name: Checkout code
