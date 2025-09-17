@@ -63,7 +63,7 @@ jobs:
   build:
     name: Build Next.js Application
     runs-on: self-hosted
-    needs: [lint, cache-nextjs]
+    needs: [lint, caching]
 
     steps:
       - name: Checkout code
