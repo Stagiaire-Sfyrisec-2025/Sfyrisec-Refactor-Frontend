@@ -115,12 +115,12 @@ jobs:
       # Docker image scan (SARIF for GitHub Security)
       - name: Run Trivy vulnerability scanner on Docker image
         run: |
-          sudo trivy image \
+          sudo -E trivy image \
             --format sarif \
             --output trivy-image-results.sarif \
             --severity CRITICAL,HIGH \
             --ignore-unfixed \
-            'job-${{ github.run_id }}:latest'
+            'job-${{ github.run_id }}:latest-refactor-ui'
 
       - name: Upload Docker image scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
@@ -131,12 +131,12 @@ jobs:
       # Docker image vulnerabilities (table format for logs with exit code)
       - name: Run Trivy on Docker image (fail on critical/high)
         run: |
-          sudo trivy image \
+          sudo -E trivy image \
             --format table \
             --exit-code 1 \
             --severity CRITICAL,HIGH \
             --ignore-unfixed \
-            'job-${{ github.run_id }}:latest'
+            'job-${{ github.run_id }}:latest-refactor-ui'
 
   docker-push:
     name: Push Docker Image to Registry
