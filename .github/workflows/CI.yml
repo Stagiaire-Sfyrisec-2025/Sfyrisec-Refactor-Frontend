@@ -87,11 +87,7 @@ jobs:
         with:
           name: nextjs-build
           path: .next
-
-      - name: Log in to Docker Hub
-        if: github.event_name == 'push'
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-      
+     
       - name: Build Docker image
         run: |
           sudo docker build . \
@@ -99,10 +95,6 @@ jobs:
             --tag job-${{ github.run_id }}:${{ github.sha }} \
             --tag job-${{ github.run_id }}:latest \
             --tag ${{ secrets.DOCKER_USERNAME }}/sfyrisec-refactor-app-image:latest-refactor-ui
-
-      - name: Push Docker image to Docker Hub
-        if: github.event_name == 'push'
-        run: sudo docker push ${{ secrets.DOCKER_USERNAME }}/sfyrisec-refactor-app-image:latest-refactor-ui
 
   # Job 4 : Security Scan
   security-scan:
@@ -147,3 +139,16 @@ jobs:
           severity: 'CRITICAL,HIGH'
           skip-setup-trivy: true
           ignore-unfixed: true
+
+  docker-push:
+    name: Push Docker Image to Registry
+    runs-on: self-hosted
+    needs: [security-scan, build]
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Push Docker image to Docker Hub
+        run: sudo docker push ${{ secrets.DOCKER_USERNAME }}/sfyrisec-refactor-app-image:latest-refactor-ui
