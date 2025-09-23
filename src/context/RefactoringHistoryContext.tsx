@@ -4,10 +4,12 @@ import React, { createContext, useState, ReactNode, useEffect } from 'react';
 export interface HistoryEntry {
   id: string;
   timestamp: Date;
-  initialAnalysis: any; // The result from the first analysis
-  refactoredAnalysis: any; // The result after refactoring
-  options: any; // The options used for refactoring
-  projectName: string; // A name for the project/session
+  initialAnalysis: any;
+  refactoredAnalysis: any;
+  options: any;
+  projectName: string;
+  originalCode: string;
+  refactoredCode: string;
 }
 
 // Define the shape of the context
