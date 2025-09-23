@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera, faSave, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
@@ -16,6 +16,8 @@ const ProfilePage = () => {
     phone: '+1 (555) 123-4567',
     bio: "Développeur full-stack avec 5 ans d'expérience. Passionné par les bonnes pratiques de code et l'optimisation des performances.",
     avatar: 'https://via.placeholder.com/150',
+    githubUrl: 'https://github.com/Rojotiana',
+    portfolioUrl: 'https://portfolio.Rojotiana.dev',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -45,6 +47,69 @@ const ProfilePage = () => {
     setIsEditMode(false);
   };
 
+  const {
+    optimizedLines,
+    avgPerformance,
+    topLanguages,
+  } = useMemo(() => {
+    const stats = {
+      optimizedLines: 0,
+      totalInitialComplexity: 0,
+      totalRefactoredComplexity: 0,
+      validHistoryEntries: 0,
+      languageCounts: {} as Record<string, number>,
+    };
+
+    history.forEach(entry => {
+      const hasCode = entry.originalCode && entry.refactoredCode;
+      if (hasCode) {
+        const originalLines = entry.originalCode.split('\n').length;
+        const refactoredLines = entry.refactoredCode.split('\n').length;
+        stats.optimizedLines += (originalLines - refactoredLines);
+      }
+
+      const hasAnalysis = entry.initialAnalysis?.summary && entry.refactoredAnalysis?.summary;
+      if (hasAnalysis) {
+        const initialComplexity = entry.initialAnalysis.summary.cyclomaticComplexity;
+        const refactoredComplexity = entry.refactoredAnalysis.summary.cyclomaticComplexity;
+
+        if (initialComplexity > 0) {
+          stats.totalInitialComplexity += initialComplexity;
+          stats.totalRefactoredComplexity += refactoredComplexity;
+          stats.validHistoryEntries++;
+        }
+      }
+
+      const lang = entry.refactoredAnalysis?.detectedLanguage;
+      if (lang && lang !== 'Unknown') {
+        stats.languageCounts[lang] = (stats.languageCounts[lang] || 0) + 1;
+      }
+    });
+
+    const avgPerformance = stats.validHistoryEntries > 0
+      ? ((stats.totalInitialComplexity - stats.totalRefactoredComplexity) / stats.totalInitialComplexity) * 100
+      : 0;
+
+    const topLanguages = Object.entries(stats.languageCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 4)
+      .map(([lang]) => lang);
+
+    return {
+      optimizedLines: stats.optimizedLines,
+      avgPerformance: `${avgPerformance >= 0 ? '+' : ''}${avgPerformance.toFixed(0)}%`,
+      topLanguages,
+    };
+  }, [history]);
+
+  const languageColors: Record<string, string> = {
+    JavaScript: 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200',
+    TypeScript: 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200',
+    Python: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200',
+    Java: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200',
+    PHP: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-200',
+  };
+
   return (
     <section id="profile-section" className="p-6 bg-gray-50 dark:bg-dark-main-bg">
       <div className="bg-white dark:bg-dark-card-bg p-8 rounded-xl shadow-md mb-8">
@@ -72,23 +137,43 @@ const ProfilePage = () => {
             <div className="mt-6">
               <h4 className="font-medium text-gray-800 dark:text-dark-text-main mb-2">Langages préférés</h4>
               <div className="flex flex-wrap gap-2">
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200 text-xs rounded-full">JavaScript</span>
-                <span className="px-2 py-1 bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200 text-xs rounded-full">TypeScript</span>
-                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200 text-xs rounded-full">Python</span>
-                <span className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200 text-xs rounded-full">Java</span>
+                {topLanguages.length > 0 ? (
+                  topLanguages.map(lang => (
+                    <span key={lang} className={`px-2 py-1 ${languageColors[lang] || 'bg-gray-100 text-gray-800'} text-xs rounded-full`}>
+                      {lang}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-sm text-gray-500">Aucun langage détecté.</span>
+                )}
               </div>
             </div>
 
             <div className="mt-6">
               <h4 className="font-medium text-gray-800 dark:text-dark-text-main mb-2">Liens</h4>
-              <div className="flex items-center text-sm text-blue-600 dark:text-dark-link hover:text-blue-800 dark:hover:text-white mb-2">
-                <FontAwesomeIcon icon={faGithub} className="mr-2" />
-                <a href="#" target="_blank">github.com/Rojotiana</a>
-              </div>
-              <div className="flex items-center text-sm text-blue-600 dark:text-dark-link hover:text-blue-800 dark:hover:text-white">
-                <i className="fas fa-globe mr-2"></i>
-                <a href="#" target="_blank">portfolio.Rojotiana.dev</a>
-              </div>
+              {isEditMode ? (
+                <>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">URL GitHub</label>
+                    <input type="text" name="githubUrl" value={profile.githubUrl} onChange={handleInputChange} className="w-full border rounded-lg px-3 py-2 bg-white dark:bg-dark-main-bg text-gray-900 dark:text-dark-text-main border-gray-300 dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">URL Portfolio</label>
+                    <input type="text" name="portfolioUrl" value={profile.portfolioUrl} onChange={handleInputChange} className="w-full border rounded-lg px-3 py-2 bg-white dark:bg-dark-main-bg text-gray-900 dark:text-dark-text-main border-gray-300 dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center text-sm text-blue-600 dark:text-dark-link hover:text-blue-800 dark:hover:text-white mb-2">
+                    <FontAwesomeIcon icon={faGithub} className="mr-2" />
+                    <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer">{profile.githubUrl}</a>
+                  </div>
+                  <div className="flex items-center text-sm text-blue-600 dark:text-dark-link hover:text-blue-800 dark:hover:text-white">
+                    <i className="fas fa-globe mr-2"></i>
+                    <a href={profile.portfolioUrl} target="_blank" rel="noopener noreferrer">{profile.portfolioUrl}</a>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -179,11 +264,7 @@ const ProfilePage = () => {
               <div>
                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary">Lignes optimisées</p>
                 <p className="text-2xl font-bold text-gray-800 dark:text-dark-text-main">
-                  {history.reduce((acc, entry) => {
-                    const originalLines = entry.originalCode?.split('\n').length || 0;
-                    const refactoredLines = entry.refactoredCode?.split('\n').length || 0;
-                    return acc + (originalLines - refactoredLines);
-                  }, 0)}
+                  {optimizedLines}
                 </p>
               </div>
             </div>
@@ -196,16 +277,7 @@ const ProfilePage = () => {
               <div>
                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary">Performance moyenne</p>
                 <p className="text-2xl font-bold text-gray-800 dark:text-dark-text-main">
-                  {(() => {
-                    const improvements = history.map(entry => {
-                      const initialComplexity = entry.initialAnalysis?.summary?.cyclomaticComplexity || 0;
-                      const refactoredComplexity = entry.refactoredAnalysis?.summary?.cyclomaticComplexity || 0;
-                      if (initialComplexity === 0) return 0;
-                      return ((initialComplexity - refactoredComplexity) / initialComplexity) * 100;
-                    });
-                    const avgImprovement = improvements.reduce((acc, val) => acc + val, 0) / (improvements.length || 1);
-                    return `${avgImprovement >= 0 ? '+' : ''}${avgImprovement.toFixed(0)}%`;
-                  })()}
+                  {avgPerformance}
                 </p>
               </div>
             </div>
