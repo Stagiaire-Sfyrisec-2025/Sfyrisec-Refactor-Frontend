@@ -167,7 +167,7 @@ const ProfilePage = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary">Projets analysés</p>
-                <p className="text-2xl font-bold text-gray-800 dark:text-dark-text-main">24</p>
+                <p className="text-2xl font-bold text-gray-800 dark:text-dark-text-main">{history.length}</p>
               </div>
             </div>
           </div>
@@ -178,7 +178,13 @@ const ProfilePage = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary">Lignes optimisées</p>
-                <p className="text-2xl font-bold text-gray-800 dark:text-dark-text-main">1,245</p>
+                <p className="text-2xl font-bold text-gray-800 dark:text-dark-text-main">
+                  {history.reduce((acc, entry) => {
+                    const originalLines = entry.originalCode?.split('\n').length || 0;
+                    const refactoredLines = entry.refactoredCode?.split('\n').length || 0;
+                    return acc + (originalLines - refactoredLines);
+                  }, 0)}
+                </p>
               </div>
             </div>
           </div>
@@ -189,7 +195,18 @@ const ProfilePage = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary">Performance moyenne</p>
-                <p className="text-2xl font-bold text-gray-800 dark:text-dark-text-main">+28%</p>
+                <p className="text-2xl font-bold text-gray-800 dark:text-dark-text-main">
+                  {(() => {
+                    const improvements = history.map(entry => {
+                      const initialComplexity = entry.initialAnalysis?.summary?.cyclomaticComplexity || 0;
+                      const refactoredComplexity = entry.refactoredAnalysis?.summary?.cyclomaticComplexity || 0;
+                      if (initialComplexity === 0) return 0;
+                      return ((initialComplexity - refactoredComplexity) / initialComplexity) * 100;
+                    });
+                    const avgImprovement = improvements.reduce((acc, val) => acc + val, 0) / (improvements.length || 1);
+                    return `${avgImprovement >= 0 ? '+' : ''}${avgImprovement.toFixed(0)}%`;
+                  })()}
+                </p>
               </div>
             </div>
           </div>
