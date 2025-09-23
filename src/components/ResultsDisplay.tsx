@@ -76,14 +76,14 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ status, onReset, analys
   const handleDownloadReport = () => {
     if (!analysisResult) return;
     const reportJson = JSON.stringify(analysisResult, null, 2);
-    const blob = new Blob([reportJson], { type: 'application/json' });
+    const blob = new Blob([reportJson], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     const originalFileName = analysisResult?.fileDetails?.[0]?.fileName || 'refactor_report';
     const reportName = originalFileName.includes('.')
-      ? `${originalFileName.split('.').slice(0, -1).join('.')}_report.json`
-      : `${originalFileName}_report.json`;
+      ? `${originalFileName.split('.').slice(0, -1).join('.')}_report.txt`
+      : `${originalFileName}_report.txt`;
     a.download = reportName;
     document.body.appendChild(a);
     a.click();

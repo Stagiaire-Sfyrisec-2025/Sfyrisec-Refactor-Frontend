@@ -17,11 +17,11 @@ const SettingsPage = () => {
     }
 
     const jsonString = JSON.stringify(history, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
+    const blob = new Blob([jsonString], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'refactoring_history.json';
+    a.download = 'refactoring_history.txt';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
