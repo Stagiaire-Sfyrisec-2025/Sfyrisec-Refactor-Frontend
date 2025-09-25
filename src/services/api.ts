@@ -1,64 +1,51 @@
 import { UploadedFile, RefactorOptions } from '../types/project';
 
-export const uploadFiles = async (files: UploadedFile[], options: RefactorOptions): Promise<any> => {
-  const formData = new FormData();
+const API_BASE_URL = 'http://localhost:8000/api/v1';
 
-  files.forEach(file => {
-    formData.append('file', file.rawFile, file.name);
-  });
+class ApiClient {
+  private async request(endpoint: string, options: RequestInit = {}): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
 
-  const optionsBlob = new Blob([JSON.stringify(options)], { type: 'application/json' });
-  formData.append('options', optionsBlob);
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody}`);
+    }
 
-  const response = await fetch('http://localhost:8000/api/v1/upload/', {
-    method: 'POST',
-    body: formData,
-  });
-
-  if (!response.ok) {
-    // Try to get error details from the body
-    const errorBody = await response.text();
-    throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody}`);
+    return response.json();
   }
 
-  return response.json();
-};
+  public upload(files: UploadedFile[], options: RefactorOptions): Promise<any> {
+    const formData = new FormData();
 
-export const analyzeCode = async (sessionId: string): Promise<any> => {
-  const response = await fetch(`http://localhost:8000/api/v1/analyze/${sessionId}`, {
-    method: 'GET',
-  });
+    files.forEach(file => {
+      formData.append('file', file.rawFile, file.name);
+    });
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody}`);
+    const optionsBlob = new Blob([JSON.stringify(options)], { type: 'application/json' });
+    formData.append('options', optionsBlob);
+
+    return this.request('/upload/', {
+      method: 'POST',
+      body: formData,
+    });
   }
 
-  return response.json();
-};
-
-export const refactorCode = async (sessionId: string): Promise<any> => {
-  const response = await fetch(`http://localhost:8000/api/v1/refactor/${sessionId}`, {
-    method: 'GET',
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody}`);
+  public analyze(sessionId: string): Promise<any> {
+    return this.request(`/analyze/${sessionId}`);
   }
 
-  return response.json();
-};
-
-export const getHistory = async (): Promise<any> => {
-  const response = await fetch('http://localhost:8000/api/v1/history/', {
-    method: 'GET',
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody}`);
+  public refactor(sessionId: string): Promise<any> {
+    return this.request(`/refactor/${sessionId}`);
   }
 
-  return response.json();
-};
+  public getHistory(): Promise<any> {
+    return this.request('/history/');
+  }
+}
+
+const apiClient = new ApiClient();
+
+export const uploadFiles = apiClient.upload.bind(apiClient);
+export const analyzeCode = apiClient.analyze.bind(apiClient);
+export const refactorCode = apiClient.refactor.bind(apiClient);
+export const getHistory = apiClient.getHistory.bind(apiClient);

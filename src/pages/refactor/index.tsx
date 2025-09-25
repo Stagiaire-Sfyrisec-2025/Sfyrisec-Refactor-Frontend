@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useCallback } from 'react';
 import RefactorForm from '@/components/RefactorForm';
 import ResultsDisplay from '@/components/ResultsDisplay';
 import { UploadedFile, RefactorOptions } from '@/types/project';
@@ -13,7 +13,7 @@ const RefactorPage = () => {
   const [selectedFiles, setSelectedFiles] = useState<UploadedFile[]>([]);
   const [projectName, setProjectName] = useState<string>('');
   const [analysisResult, setAnalysisResult] = useState<any>(null);
-  const [initialAnalysis, setInitialAnalysis] = useState<any>(null); // To store the 'before' state
+  const [initialAnalysis, setInitialAnalysis] = useState<any>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [originalCode, setOriginalCode] = useState<string>('');
   const [refactoredCode, setRefactoredCode] = useState<string>('');
@@ -49,73 +49,54 @@ const RefactorPage = () => {
     }));
   };
 
-  const handleAnalysisStart = async () => {
+  const handleAnalysisStart = useCallback(async () => {
     setStatus('analyzing');
     try {
-      // Étape 1: Charger les fichiers pour obtenir un ID de session
       const uploadResult = await uploadFiles(selectedFiles, options);
       if (!uploadResult.session_id) {
-        throw new Error("ID de session non trouvé dans la réponse d'upload");
+        throw new Error("ID de session non trouvé");
       }
       const newSessionId = uploadResult.session_id;
       setSessionId(newSessionId);
 
-      // Étape 2: Appeler l'endpoint d'analyse avec l'ID de session
-      const analysisResultData = await analyzeCode(newSessionId);
-
-      // Utiliser `analysisResultData.analysis` si la réponse est structurée ainsi
-      const transformedResult = transformAnalysisReport(analysisResultData.analysis || analysisResultData);
-      setAnalysisResult(transformedResult);
-      setInitialAnalysis(transformedResult);
+      const analysisData = await analyzeCode(newSessionId);
+      const transformed = transformAnalysisReport(analysisData.analysis || analysisData);
+      setAnalysisResult(transformed);
+      setInitialAnalysis(transformed);
       setStatus('analyzed');
     } catch (error) {
-      console.error("Échec de l'analyse du code:", error);
-      setAnalysisResult(null);
+      console.error("Analysis failed:", error);
       setStatus('error');
     }
-  };
+  }, [selectedFiles, options]);
 
-  const handleRefactorStart = async () => {
-    if (!sessionId) {
-      console.error('No session ID found for refactoring');
-      setStatus('error');
-      return;
-    }
+  const handleRefactorStart = useCallback(async () => {
+    if (!sessionId) return;
 
     setStatus('refactoring');
-
     try {
-      const refactorResult = await refactorCode(sessionId);
+      const result = await refactorCode(sessionId);
+      const transformed = transformAnalysisReport(result.analysis);
 
-      // This is the critical change:
-      // The analysis report is now in a nested object.
-      const transformedResult = transformAnalysisReport(refactorResult.analysis);
-
-      // Set all state variables from the new API response structure
-      setAnalysisResult(transformedResult);
-      setOriginalCode(refactorResult.originalCode);
-      setRefactoredCode(refactorResult.refactoredCode);
-
-      const finalOptions = { ...options };
-      if (options.mainLanguage === 'Détection automatique') {
-        finalOptions.mainLanguage = analysisResult.detectedLanguage || 'Unknown';
-      }
+      setAnalysisResult(transformed);
+      setOriginalCode(result.originalCode);
+      setRefactoredCode(result.refactoredCode);
 
       addHistoryEntry({
         initialAnalysis,
-        refactoredAnalysis: transformedResult,
-        options: finalOptions,
+        refactoredAnalysis: transformed,
+        options,
         projectName: projectName || 'Projet sans nom',
-        originalCode: refactorResult.originalCode,
-        refactoredCode: refactorResult.refactoredCode,
+        originalCode: result.originalCode,
+        refactoredCode: result.refactoredCode,
       });
 
       setStatus('refactored');
     } catch (error) {
-      console.error('Failed to refactor code:', error);
+      console.error('Refactor failed:', error);
       setStatus('error');
     }
-  };
+  }, [sessionId, addHistoryEntry, initialAnalysis, options, projectName]);
 
   const handleReset = () => {
     setStatus('idle');
