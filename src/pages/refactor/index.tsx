@@ -115,6 +115,8 @@ const RefactorPage = () => {
         refactoredAnalysis: transformedResult,
         options: finalOptions,
         projectName: projectName || 'Projet sans nom',
+        originalCode: refactorResult.originalCode,
+        refactoredCode: refactorResult.refactoredCode,
       });
 
       setStatus('refactored');
