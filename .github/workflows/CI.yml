@@ -99,7 +99,7 @@ jobs:
           sudo docker build . \
             --file Dockerfile \
             --tag job-${{ github.run_id }}:${{ github.sha }} \
-            --tag job-${{ github.run_id }}:latest \
+            --tag job-${{ github.run_id }}:latest-refactor-ui \
             --tag ${{ secrets.DOCKER_USERNAME }}/sfyrisec-refactor-app-image:latest-refactor-ui
 
   # Job 4 : Security Scan
@@ -121,7 +121,7 @@ jobs:
       # Docker image scan (SARIF for GitHub Security)
       - name: Run Trivy vulnerability scanner on Docker image
         run: |
-          sudo -E trivy image \
+          trivy image \
             --format sarif \
             --output trivy-image-results.sarif \
             --severity CRITICAL,HIGH \
@@ -137,7 +137,7 @@ jobs:
       # Docker image vulnerabilities (table format for logs with exit code)
       - name: Run Trivy on Docker image (fail on critical/high)
         run: |
-          sudo -E trivy image \
+          trivy image \
             --format table \
             --exit-code 1 \
             --severity CRITICAL,HIGH \
