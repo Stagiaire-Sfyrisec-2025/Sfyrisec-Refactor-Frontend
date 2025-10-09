@@ -11,6 +11,16 @@ export interface Project {
   improvement?: string; // e.g., "+42%"
   fileCount?: number;
   icon?: IconDefinition;
+  initialAnalysis?: any;
+  refactoredAnalysis?: any;
+  linesOfCode?: {
+    initial?: number;
+    refactored?: number;
+  };
+  maintainability?: {
+    initial?: number;
+    refactored?: number;
+  };
   // Add other project-related fields as needed
 }
 

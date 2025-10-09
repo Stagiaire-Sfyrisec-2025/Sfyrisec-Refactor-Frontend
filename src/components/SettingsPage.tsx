@@ -1,11 +1,31 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useColorScheme } from '@mui/joy/styles';
+import { RefactoringHistoryContext } from '@/context/RefactoringHistoryContext';
 
 const SettingsPage = () => {
   const { mode, setMode } = useColorScheme();
+  const { history } = useContext(RefactoringHistoryContext);
 
   const handleThemeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMode(event.target.checked ? 'dark' : 'light');
+  };
+
+  const handleExportData = () => {
+    if (history.length === 0) {
+      alert("Il n'y a pas de données à exporter.");
+      return;
+    }
+
+    const jsonString = JSON.stringify(history, null, 2);
+    const blob = new Blob([jsonString], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'refactoring_history.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -42,7 +62,7 @@ const SettingsPage = () => {
               </div>
               <div className="flex items-center">
                 <input type="checkbox" id="app-notifications" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" defaultChecked />
-                <label htmlFor="app-notifications" className="ml-2 block text-sm text-gray-700 dark:text-dark-text-secondary">Notifications dans l'application</label>
+                <label htmlFor="app-notifications" className="ml-2 block text-sm text-gray-700 dark:text-dark-text-secondary">Notifications dans l&apos;application</label>
               </div>
             </div>
           </div>
@@ -50,7 +70,7 @@ const SettingsPage = () => {
             <h4 className="font-medium mb-4 text-gray-800 dark:text-dark-text-main">Paramètres avancés</h4>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Taille de l'éditeur de code</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Taille de l&apos;éditeur de code</label>
                 <select className="w-full md:w-1/3 border rounded-lg px-3 py-2 bg-white dark:bg-dark-main-bg dark:text-dark-text-main dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option>Petite</option>
                   <option>Moyenne</option>
@@ -58,7 +78,7 @@ const SettingsPage = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Police de l'éditeur</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-1">Police de l&apos;éditeur</label>
                 <select className="w-full md:w-1/3 border rounded-lg px-3 py-2 bg-white dark:bg-dark-main-bg dark:text-dark-text-main dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option>Courier New</option>
                   <option>Fira Code</option>
@@ -78,7 +98,10 @@ const SettingsPage = () => {
               <h4 className="font-medium text-red-800 dark:text-red-300 mb-1">Exporter toutes les données</h4>
               <p className="text-sm text-red-600 dark:text-red-400">Téléchargez une archive contenant tous vos projets et analyses</p>
             </div>
-            <button className="bg-white text-red-600 border border-red-300 px-4 py-2 rounded-lg hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-dark-btn-secondary dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/30">
+            <button
+              onClick={handleExportData}
+              className="bg-white text-red-600 border border-red-300 px-4 py-2 rounded-lg hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-dark-btn-secondary dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/30"
+            >
               <i className="fas fa-file-export mr-2"></i> Exporter
             </button>
           </div>

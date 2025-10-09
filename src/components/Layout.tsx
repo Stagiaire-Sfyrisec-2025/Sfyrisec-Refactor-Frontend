@@ -8,6 +8,7 @@ import {
 import Box from '@mui/joy/Box';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 
 const Layout = ({ children }) => {
   const { isAuthenticated, user, login, logout, isLoading } = useAuth();
@@ -72,9 +73,7 @@ const Layout = ({ children }) => {
                       <span className="text-xl font-bold text-dark dark:text-dark-text-main">CodeRefactor</span>
                     </div>
                     <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                      <Link href="/dashboard" legacyBehavior><a className={navLinkClasses('/dashboard')}>Tableau de bord</a></Link>
-                      <Link href="/refactor" legacyBehavior><a className={navLinkClasses('/refactor')}>Refactoriser</a></Link>
-                      <Link href="/history" legacyBehavior><a className={navLinkClasses('/history')}>Historique</a></Link>
+                      {/* Navigation links here */}
                     </div>
                   </div>
                   <div className="hidden sm:ml-6 sm:flex sm:items-center">
@@ -90,7 +89,13 @@ const Layout = ({ children }) => {
                           onClick={() => setUserMenuOpen(!userMenuOpen)}
                         >
                           <span className="sr-only">Ouvrir le menu utilisateur</span>
-                          <img className="h-8 w-8 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="User" />
+                          <Image
+                            className="h-8 w-8 rounded-full"
+                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"
+                            alt="User"
+                            width={32}
+                            height={32}
+                          />
                         </button>
                       </div>
                       {userMenuOpen && (
@@ -130,35 +135,21 @@ const Layout = ({ children }) => {
                 </div>
               </div>
               <div className={`${mobileMenuOpen ? 'block' : 'hidden'} sm:hidden bg-white dark:bg-dark-card-bg`} id="mobile-menu">
-                <div className="pt-2 pb-3 space-y-1">
-                  <Link href="/dashboard" legacyBehavior><a onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClasses('/dashboard')}>Tableau de bord</a></Link>
-                  <Link href="/refactor" legacyBehavior><a onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClasses('/refactor')}>Refactoriser</a></Link>
-                  <Link href="/history" legacyBehavior><a onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClasses('/history')}>Historique</a></Link>
-                </div>
                 <div className="pt-4 pb-3 border-t border-gray-200 dark:border-dark-border">
                   <div className="flex items-center px-4">
                     <div className="flex-shrink-0">
-                      <img className="h-10 w-10 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="User" />
+                      <Image
+                        className="h-10 w-10 rounded-full"
+                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"
+                        alt="User"
+                        width={40}
+                        height={40}
+                      />
                     </div>
                     <div className="ml-3">
                       <div className="text-base font-medium text-gray-800 dark:text-dark-text-main">{user?.name || 'Utilisateur'}</div>
                       <div className="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">{user?.email || 'email@example.com'}</div>
                     </div>
-                  </div>
-                  <div className="mt-3 space-y-1">
-                     <Link href="/profile" legacyBehavior>
-                       <a className="block px-4 py-2 text-base font-medium text-gray-500 dark:text-dark-text-secondary hover:text-gray-800 dark:hover:text-dark-text-main hover:bg-gray-100 dark:hover:bg-dark-card-bg" onClick={() => setMobileMenuOpen(false)}>Profil</a>
-                     </Link>
-                     <Link href="/settings" legacyBehavior>
-                       <a className="block px-4 py-2 text-base font-medium text-gray-500 dark:text-dark-text-secondary hover:text-gray-800 dark:hover:text-dark-text-main hover:bg-gray-100 dark:hover:bg-dark-card-bg" onClick={() => setMobileMenuOpen(false)}>Paramètres</a>
-                     </Link>
-                    <a
-                      href="#"
-                      onClick={(e) => { e.preventDefault(); handleLogout(); }}
-                      className="block px-4 py-2 text-base font-medium text-gray-500 dark:text-dark-text-secondary hover:text-gray-800 dark:hover:text-dark-text-main hover:bg-gray-100 dark:hover:bg-dark-card-bg"
-                    >
-                      Déconnexion
-                    </a>
                   </div>
                 </div>
               </div>
@@ -168,7 +159,13 @@ const Layout = ({ children }) => {
               <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 md:pt-16">
                 <div className="flex flex-col flex-grow bg-white dark:bg-dark-card-bg overflow-y-auto border-r border-gray-200 dark:border-dark-border">
                   <div className="flex items-center flex-shrink-0 px-4 pt-5">
-                     <img className="h-8 w-8 rounded-full mr-2" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="User" />
+                    <Image
+                      className="h-8 w-8 rounded-full mr-2"
+                      src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"
+                      alt="User"
+                      width={32}
+                      height={32}
+                    />
                     <span className="font-medium text-gray-800 dark:text-dark-text-main">{user?.name || 'Utilisateur'}</span>
                   </div>
                   <div className="mt-5 flex-grow flex flex-col">
@@ -176,8 +173,6 @@ const Layout = ({ children }) => {
                       <Link href="/dashboard" legacyBehavior><a className={sidebarLinkClasses('/dashboard')}><FontAwesomeIcon icon={faTachometerAlt} className="text-gray-500 dark:text-dark-text-secondary group-hover:text-primary mr-3 flex-shrink-0 h-5 w-5" />Tableau de bord</a></Link>
                       <Link href="/refactor" legacyBehavior><a className={sidebarLinkClasses('/refactor')}><FontAwesomeIcon icon={faCode} className="text-gray-500 dark:text-dark-text-secondary group-hover:text-primary mr-3 flex-shrink-0 h-5 w-5" />Refactoriser</a></Link>
                       <Link href="/history" legacyBehavior><a className={sidebarLinkClasses('/history')}><FontAwesomeIcon icon={faHistory} className="text-gray-500 dark:text-dark-text-secondary group-hover:text-primary mr-3 flex-shrink-0 h-5 w-5" />Historique</a></Link>
-                      <Link href="/profile" legacyBehavior><a className={sidebarLinkClasses('/profile')}><FontAwesomeIcon icon={faUserCircle} className="text-gray-500 dark:text-dark-text-secondary group-hover:text-primary mr-3 flex-shrink-0 h-5 w-5" />Profil</a></Link>
-                      <Link href="/settings" legacyBehavior><a className={sidebarLinkClasses('/settings')}><FontAwesomeIcon icon={faCog} className="text-gray-500 dark:text-dark-text-secondary group-hover:text-primary mr-3 flex-shrink-0 h-5 w-5" />Paramètres</a></Link>
                     </nav>
                   </div>
                   <div className="mt-auto p-2 border-t border-gray-200 dark:border-dark-border">

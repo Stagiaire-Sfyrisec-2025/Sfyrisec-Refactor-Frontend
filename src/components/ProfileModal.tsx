@@ -79,7 +79,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, onClose }) => {
                     <Input placeholder="Enter your full name" sx={{ borderRadius: 'md' }} />
                   </FormControl>
                   <FormControl>
-                    <FormLabel>Nom d'utilisateur</FormLabel>
+                    <FormLabel>Nom d&apos;utilisateur</FormLabel>
                     <Input placeholder="Enter your username" sx={{ borderRadius: 'md' }} />
                   </FormControl>
                   <FormControl>
