@@ -17,9 +17,6 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Cleanup workspace
-        run: rm -rf ${{ github.workspace }}/* 2>/dev/null || true
-          
       - name: Checkout code
         uses: actions/checkout@v4
         
@@ -27,9 +24,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm'
+
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
           
       - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci
         
       - name: Run ESLint
@@ -87,19 +93,66 @@ jobs:
         with:
           name: nextjs-build
           path: .next
-
-      - name: Log in to Docker Hub
-        if: github.event_name == 'push'
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-      
+     
       - name: Build Docker image
         run: |
           sudo docker build . \
             --file Dockerfile \
             --tag job-${{ github.run_id }}:${{ github.sha }} \
-            --tag job-${{ github.run_id }}:latest \
+            --tag job-${{ github.run_id }}:latest-refactor-ui \
             --tag ${{ secrets.DOCKER_USERNAME }}/sfyrisec-refactor-app-image:latest-refactor-ui
 
+  # Job 4 : Security Scan
+  security-scan:
+    name: Security Vulnerability Scan
+    runs-on: self-hosted
+    needs: build
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@v0.2.0
+        with:
+          cache: true
+          version: v0.64.1
+
+      # Docker image scan (SARIF for GitHub Security)
+      - name: Run Trivy vulnerability scanner on Docker image
+        run: |
+          trivy image \
+            --format sarif \
+            --output trivy-image-results.sarif \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed \
+            'job-${{ github.run_id }}:latest-refactor-ui'
+
+      - name: Upload Docker image scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-image-results.sarif'
+
+      # Docker image vulnerabilities (table format for logs with exit code)
+      - name: Run Trivy on Docker image (fail on critical/high)
+        run: |
+          trivy image \
+            --format table \
+            --exit-code 1 \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed \
+            'job-${{ github.run_id }}:latest-refactor-ui'
+
+  docker-push:
+    name: Push Docker Image to Registry
+    runs-on: self-hosted
+    needs: [security-scan, build]
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
       - name: Push Docker image to Docker Hub
-        if: github.event_name == 'push'
         run: sudo docker push ${{ secrets.DOCKER_USERNAME }}/sfyrisec-refactor-app-image:latest-refactor-ui
